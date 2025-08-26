@@ -1,0 +1,104 @@
+import { SiViaplay } from "react-icons/si";
+import Lottie from "lottie-react";
+
+import webAnimation from "../animations/web.json";
+import uiuxAnimation from "../animations/uiux.json";
+import appAnimation from "../animations/app.json";
+import hackingAnimation from "../animations/hacking.json";
+import aimlAnimation from "../animations/aiml.json";
+import dataScienceAnimation from "../animations/datascience.json";
+import dataAnalysisAnimation from "../animations/dataanalysis.json";
+import aiToolsAnimation from "../animations/aitools.json";
+
+
+const ExploreCourses = () => {
+  return (
+    <>
+      <div className="w-[100vw] min-h-[50vh] lg:h-[50vh] flex flex-col lg:flex-row items-center justify-center gap-4 px-[30px]">
+        {/* Left Div */}
+        <div className="w-[100%] lg:w-[350px] lg:h-[100%] h-[400px] flex flex-col items-start justify-center gap-1 md:px-[40px] px-[20px]">
+          <span className="text-[35px] font-semibold">Explore</span>
+          <span className="text-[35px] font-semibold">Our Courses</span>
+          <p className="text-[17px]">
+            Lorem ipsum dzzzzzzzzzolor sit, amet consectetur adipisicing elit. Impedit, nemo quis totam voluptates quia, ut fuga quaerat suscizpit dolor sed magni facere eaque provident aliquam recusandae eligendi est iste id.
+          </p>
+          <button className="px-[20px] py-[10px] border-2 bg-[black] border-white text-white rounded-[10px] text-[18px] font-light flex gap-2 mt-[40px]">
+            Explore Courses <SiViaplay className="w-[20px] h-[20px] fill-white" />
+          </button>
+        </div>
+
+        {/* Right Div (Icons) */}
+      <div className="w-[720px] max-w-[90%] lg:h-[300px] md:min-h-[300px] flex items-center justify-center lg:gap-[60px] gap-[50px] flex-wrap mb-[50px] lg:mb-[0px]">
+
+  {/* Web Development */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={webAnimation} loop={true} />
+    </div>
+    Web Development
+  </div>
+
+  {/* UI/UX */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={uiuxAnimation} loop={true} />
+    </div>
+    UI/UX Designing
+  </div>
+
+  {/* App Development */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={appAnimation} loop={true} />
+    </div>
+    App Development
+  </div>
+
+  {/* Ethical Hacking */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={hackingAnimation} loop={true} />
+    </div>
+    Ethical Hacking
+  </div>
+
+  {/* AI / ML */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={aimlAnimation} loop={true} />
+    </div>
+    AI / ML
+  </div>
+
+  {/* Data Science */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={dataScienceAnimation} loop={true} />
+    </div>
+    Data Science
+  </div>
+
+  {/* Data Analysis */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={dataAnalysisAnimation} loop={true} />
+    </div>
+    Data Analysis
+  </div>
+
+  {/* AI Tools */}
+  <div className="w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center">
+    <div className="w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center">
+      <Lottie animationData={aiToolsAnimation} loop={true} />
+    </div>
+    AI Tools
+  </div>
+
+</div>
+
+      </div>
+    </>
+  );
+};
+
+export default ExploreCourses;
