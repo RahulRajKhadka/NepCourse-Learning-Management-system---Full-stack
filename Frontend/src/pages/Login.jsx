@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { IoEyeOutline, IoEyeOffSharp } from "react-icons/io5";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import logo from "/public/logoo.png";
 import { serverUrl } from "../App";
@@ -16,6 +17,17 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  
+  // Add this to debug Redux state
+  const userData = useSelector((state) => state.user.userData);
+  
+  useEffect(() => {
+    console.log('Login component - Current userData:', userData);
+    // If already logged in, redirect to home
+    if (userData && Object.keys(userData).length > 0) {
+      navigate('/');
+    }
+  }, [userData, navigate]);
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -52,27 +64,48 @@ export const Login = () => {
         }
       );
 
-      console.log("Login response:", result.data);
+      console.log("Full login response:", result.data);
 
-      // FIXED: Store the user data correctly based on your backend response
-      const userData = result.data.user || result.data;
+
+
+      // Store the user data - try both possible structures
+      let userData;
+      if (result.data.user) {
+        userData = result.data.user;
+      } else if (result.data.data && result.data.data.user) {
+        userData = result.data.data.user;
+      } else {
+        // If the entire response is the user data
+        userData = result.data;
+      }
+
+      console.log("Extracted userData:", userData);
+      console.log("userData type:", typeof userData);
+      console.log("userData keys:", userData ? Object.keys(userData) : 'null/undefined');
+
+      // Dispatch to Redux
       dispatch(setUserData(userData));
 
-      toast.success("Login successful!");
+      // Verify it was stored
+      setTimeout(() => {
+        console.log("Redux state after dispatch:", 
+          JSON.parse(JSON.stringify(
+            document.querySelector('body').__reactInternalInstance?.memoizedProps?.store?.getState?.() ||
+            window.__REDUX_DEVTOOLS_EXTENSION__?.store?.getState?.() ||
+            'Cannot access Redux state'
+          ))
+        );
+      }, 100);
 
-      // FIXED: Navigate based on user role or to dashboard
-      if (userData.role === "educator") {
-        navigate("/profile");
-      } else if (userData.role === "student") {
-        navigate("/profile");
-      } else {
-        navigate("/"); // fallback
-      }
+      toast.success("Login successful!");
+      
+      // Navigate to home
+      navigate("/");
+
     } catch (error) {
       console.error("Login error:", error);
       console.error("Error response:", error.response?.data);
 
-      // FIXED: Better error handling
       if (error.code === "ECONNABORTED") {
         toast.error("Request timeout. Please try again.");
       } else if (error.response?.status === 404) {
@@ -80,20 +113,14 @@ export const Login = () => {
       } else if (error.response?.status === 400) {
         toast.error(error.response.data.message || "Invalid email or password");
       } else if (error.response?.status === 401) {
-        toast.error(
-          "Invalid credentials. Please check your email and password."
-        );
+        toast.error("Invalid credentials. Please check your email and password.");
       } else if (error.response?.status === 500) {
         console.error("Server error details:", error.response.data);
         toast.error("Server error. Please try again later.");
       } else if (!error.response) {
-        toast.error(
-          "Network error. Please check your connection and ensure the server is running."
-        );
+        toast.error("Network error. Please check your connection and ensure the server is running.");
       } else {
-        toast.error(
-          error.response?.data?.message || "Login failed. Please try again."
-        );
+        toast.error(error.response?.data?.message || "Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -101,14 +128,13 @@ export const Login = () => {
   };
 
   const handleDemoLogin = async (demoType) => {
-    // FIXED: Use realistic demo credentials that might actually exist
     const demoCredentials = {
       student: {
         email: "student@demo.com",
         password: "password123",
       },
       educator: {
-        email: "educator@demo.com",
+        email: "educator@demo.com", 
         password: "password123",
       },
     };
@@ -116,13 +142,11 @@ export const Login = () => {
     setEmail(demoCredentials[demoType].email);
     setPassword(demoCredentials[demoType].password);
 
-    // Small delay to show the filled values, then auto-login
     setTimeout(() => {
       handleLogin();
     }, 500);
   };
 
-  // FIXED: Handle form submission properly
   const handleFormSubmit = (e) => {
     e.preventDefault();
     handleLogin();
@@ -141,12 +165,10 @@ export const Login = () => {
             <h2 className="text-gray-600">Log in to your account</h2>
           </div>
 
+
           {/* Email Input */}
           <div className="w-full max-w-md">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -165,10 +187,7 @@ export const Login = () => {
 
           {/* Password Input */}
           <div className="w-full max-w-md relative">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <input
@@ -207,7 +226,6 @@ export const Login = () => {
               type="button"
               onClick={() => handleDemoLogin("educator")}
               className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
-              disabled={loading}
             >
               Demo Educator
             </button>
@@ -229,44 +247,29 @@ export const Login = () => {
             )}
           </button>
 
-          {/* Forgot Password */}
-          <Link
-            to="/forgot-password"
-            className="text-blue-600 hover:text-blue-800 text-sm underline mt-2"
-          >
+          {/* Rest of your form elements... */}
+          <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm underline mt-2">
             Forgot Password?
           </Link>
 
-          {/* Divider */}
           <div className="w-full max-w-md flex items-center my-6">
             <div className="flex-1 h-px bg-gray-300"></div>
             <p className="px-4 text-sm text-gray-500">Or continue with</p>
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-          {/* Google Sign In */}
           <button
             type="button"
             className="flex items-center justify-center w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50"
             disabled={loading}
           >
-            <img
-              className="w-5 h-5 mr-3"
-              src="https://www.google.com/favicon.ico"
-              alt="Google logo"
-            />
-            <span className="text-gray-700 font-medium">
-              Sign in with Google
-            </span>
+            <img className="w-5 h-5 mr-3" src="https://www.google.com/favicon.ico" alt="Google logo" />
+            <span className="text-gray-700 font-medium">Sign in with Google</span>
           </button>
 
-          {/* Sign Up Link */}
           <div className="text-gray-600 text-sm mt-4">
             Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
+            <Link to="/signup" className="text-blue-600 hover:text-blue-800 underline">
               Sign Up
             </Link>
           </div>
@@ -274,17 +277,9 @@ export const Login = () => {
 
         {/* Right side - Banner */}
         <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 rounded-r-2xl flex-col items-center justify-center gap-6 p-8">
-          <img
-            src={logo}
-            alt="NEP Courses Logo"
-            className="w-4/5 max-w-xs rounded-2xl shadow-2xl"
-          />
-          <h1 className="text-2xl font-bold text-white text-center">
-            WELCOME TO NEPCOURSES
-          </h1>
-          <p className="text-blue-100 text-center">
-            Your gateway to quality education and learning opportunities
-          </p>
+          <img src={logo} alt="NEP Courses Logo" className="w-4/5 max-w-xs rounded-2xl shadow-2xl" />
+          <h1 className="text-2xl font-bold text-white text-center">WELCOME TO NEPCOURSES</h1>
+          <p className="text-blue-100 text-center">Your gateway to quality education and learning opportunities</p>
         </div>
       </form>
     </div>

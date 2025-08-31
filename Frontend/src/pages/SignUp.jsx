@@ -88,13 +88,16 @@ export function SignUp() {
           email: formData.email,
           password: formData.password,
           role: formData.role,
+         
         },
         {
           withCredentials: true,
         }
       );
+      
+ console.log(formData.role);
 
-      dispatch(setUserData(response.data));
+      dispatch(setUserData(response.data.user));
 
       console.log("Signup successful:", response.data);
       toast.success("Signup successful! Welcome!");

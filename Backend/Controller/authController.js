@@ -2,17 +2,38 @@ import User from "../Model/userModel.js";
 import genToken from "../config/token.js";
 import validator from "validator";
 import sendMail from "../config/sendMail.js";
-
 import bcrypt from "bcryptjs";
 
-
-
-// Updated signUP function - Remove manual hashing
 export const signUP = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+    
+  
+    console.log("Received signup data:", { 
+      name, 
+      email, 
+      role, 
+      passwordProvided: !!password 
+    });
 
-    // Check if user already exists
+  
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+   
+    const validRoles = ['student', 'educator', 'teacher', 'admin'];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role specified",
+      });
+    }
+
+ 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -21,23 +42,25 @@ export const signUP = async (req, res) => {
       });
     }
 
-    // Create user - let the model middleware handle password hashing
+   
     const user = await User.create({
       name,
       email,
-      password // Don't hash here - the model will do it
+      password, 
+      role: role || 'student' 
     });
 
     // Generate token
     const token = genToken(user._id);
 
-    // Return user data without password
+    // Return user data without password - INCLUDE ROLE
     const userData = {
       _id: user._id,
       name: user.name,
       email: user.email,
-      photoUrl: user.photoUrl,
-      description: user.description,
+      role: user.role, // ✅ Include role in response
+      photoUrl: user.photoUrl || null, // Handle undefined gracefully
+      description: user.description || null, // Handle undefined gracefully
       createdAt: user.createdAt,
     };
 
@@ -49,6 +72,24 @@ export const signUP = async (req, res) => {
     });
   } catch (error) {
     console.error("Register error:", error);
+    
+    // Handle mongoose validation errors more specifically
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: "Validation error: " + messages.join(', '),
+      });
+    }
+    
+    // Handle duplicate key errors (in case email index exists)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Server error during registration",
@@ -56,7 +97,7 @@ export const signUP = async (req, res) => {
   }
 };
 
-// Updated resetPassword function - Remove manual hashing
+
 export const resetPassword = async (req, res) => {
   try {
     const { email, password } = req.body;

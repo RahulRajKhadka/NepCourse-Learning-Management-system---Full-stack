@@ -83,20 +83,20 @@ const ExploreCourses = () => {
       </div>
 
       {/* Right Div (Icons Grid) */}
-      <div className="w-full lg:w-1/2 flex flex-wrap justify-center gap-8">
+      <div className="w-full lg:w-1/2 flex flex-wrap justify-center gap-5">
         {courses.map((course, index) => {
           const IconComponent = course.icon;
           return (
             <motion.div
               key={index}
-              className="w-[100px] flex flex-col items-center flex-wrap gap-3 text-center cursor-pointer"
+              className="w-[80px] flex flex-col items-center flex-wrap gap-3 text-center cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.1 }}
             >
               <motion.div
-                className={`w-[100px] h-[90px] bg-gradient-to-br ${course.color} rounded-lg flex items-center justify-center shadow-lg`}
+                className={`w-[50px] h-[50px] bg-gradient-to-br ${course.color} rounded-lg flex items-center justify-center shadow-lg`}
                 whileHover={{
                   boxShadow:
                     "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",

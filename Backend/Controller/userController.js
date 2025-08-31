@@ -1,8 +1,8 @@
 // In userController.js
 import User from "../Model/userModel.js";
-import { uploadBufferToCloudinary } from "../config/cloudinary.js";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
 
-// Get current user profile
+
 export const getCurrentUser = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -46,7 +46,6 @@ export const getCurrentUser = async (req, res) => {
 };
 
 
-// In userController.js - updateProfile function
 export const updateProfile = async (req, res) => {
   try {
     console.log("Update profile request received");

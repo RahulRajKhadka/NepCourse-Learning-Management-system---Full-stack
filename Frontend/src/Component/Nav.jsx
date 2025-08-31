@@ -16,35 +16,41 @@ function Nav() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Enhanced debugging
   useEffect(() => {
     console.log("=== NAV COMPONENT DEBUG ===");
     console.log("userData:", userData);
     console.log("userData type:", typeof userData);
     console.log("userData is null:", userData === null);
     console.log("userData is undefined:", userData === undefined);
-    console.log("userData keys:", userData ? Object.keys(userData) : 'No keys');
-    console.log("userData length:", userData && typeof userData === 'object' ? Object.keys(userData).length : 'Not an object');
-    console.log("Is user logged in?", !!(userData && Object.keys(userData).length > 0));
+    console.log("userData keys:", userData ? Object.keys(userData) : "No keys");
+    console.log(
+      "userData length:",
+      userData && typeof userData === "object"
+        ? Object.keys(userData).length
+        : "Not an object"
+    );
+    console.log(
+      "Is user logged in?",
+      !!(userData && Object.keys(userData).length > 0)
+    );
     console.log("==========================");
   }, [userData]);
 
+  const handleLogout = async () => {
+    try {
+      const result = await axios.get(`${serverUrl}/api/auth/logout`, {
+        withCredentials: true,
+      });
 
-const handleLogout = async () => {
-  try {
-    const result = await axios.get(`${serverUrl}/api/auth/logout`, {
-      withCredentials: true,
-    });
+      dispatch(clearUserData()); // ✅ clears Redux + localStorage
 
-    dispatch(clearUserData()); // ✅ clears Redux + localStorage
-
-    toast.success(result.data.message || "Logout successful");
-    navigate("/");
-  } catch (err) {
-    console.error("Logout error:", err);
-    toast.error(err.response?.data?.message || "Logout failed");
-  }
-};
+      toast.success(result.data.message || "Logout successful");
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+      toast.error(err.response?.data?.message || "Logout failed");
+    }
+  };
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -53,10 +59,11 @@ const handleLogout = async () => {
   };
 
   // More robust user check
-  const isUserLoggedIn = userData && 
-                        userData !== null && 
-                        typeof userData === 'object' && 
-                        Object.keys(userData).length > 0;
+  const isUserLoggedIn =
+    userData &&
+    userData !== null &&
+    typeof userData === "object" &&
+    Object.keys(userData).length > 0;
 
   console.log("Final isUserLoggedIn:", isUserLoggedIn);
 
@@ -68,7 +75,11 @@ const handleLogout = async () => {
           <img
             src={logo}
             alt="Logo"
-            className="rounded-[5px] border-2 border-white w-[50px] md:w-[60px] cursor-pointer"
+            className="rounded-[5px] border-2 border-white w-[50px] md:w-[60px] cursor-pointer
+               transition-all duration-500 ease-in-out
+               hover:border-blue-400 hover:shadow-xl hover:shadow-blue-400/40
+               hover:scale-110  hover:brightness-110
+               active:scale-95 "
             onClick={() => handleNavigation("/")}
           />
         </div>
@@ -82,6 +93,34 @@ const handleLogout = async () => {
         <div className="hidden md:flex items-center gap-4">
           {isUserLoggedIn ? (
             <>
+              {/* Dashboard Button - Only for educators */}
+              {(userData?.role === "educator" ||
+                userData?.role === "teacher") && (
+                <button
+                  onClick={() => navigate("/Dashboard")}
+                  className="w-full px-4 py-3 text-white bg-blue-600 
+             flex items-center gap-2 rounded-md
+             hover:text-black hover:fill-black
+             hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30
+             transition-all duration-300"
+                >
+                  <svg
+                    className="w-5 h-5 transition-colors duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                  Dashboard
+                </button>
+              )}
+
               {/* User Menu */}
               <div
                 className="relative group"
@@ -110,24 +149,15 @@ const handleLogout = async () => {
                     My Profile
                   </button>
 
-                  <button 
+                  <button
                     className="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                     onClick={() => handleNavigation("/courses")}
                   >
                     My Courses
                   </button>
-                  
-                  {(userData?.role === "educator" || userData?.role === "teacher") && (
-                    <button 
-                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-                      onClick={() => handleNavigation("/dashboard")}
-                    >
-                      Dashboard
-                    </button>
-                  )}
-                  
+
                   <div className="border-t border-gray-200 my-2"></div>
-                  
+
                   <button
                     className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                     onClick={handleLogout}
@@ -186,9 +216,7 @@ const handleLogout = async () => {
                   <p className="text-sm font-medium">
                     {userData?.name || userData?.username || "User"}
                   </p>
-                  <p className="text-xs text-gray-300">
-                    {userData?.email}
-                  </p>
+                  <p className="text-xs text-gray-300">{userData?.email}</p>
                 </div>
               </div>
 
@@ -199,17 +227,18 @@ const handleLogout = async () => {
                 My Profile
               </button>
 
-              <button 
+              <button
                 className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
                 onClick={() => handleNavigation("/courses")}
               >
                 My Courses
               </button>
-              
-              {(userData?.role === "educator" || userData?.role === "teacher") && (
-                <button 
+
+              {(userData?.role === "educator" ||
+                userData?.role === "teacher") && (
+                <button
                   className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
-                  onClick={() => handleNavigation("/dashboard")}
+                  onClick={() => navigate("/Dashboard")}
                 >
                   Dashboard
                 </button>
@@ -236,4 +265,4 @@ const handleLogout = async () => {
   );
 }
 
-export default Nav; 
+export default Nav;

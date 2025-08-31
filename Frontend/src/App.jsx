@@ -11,6 +11,10 @@ import Profile from "./pages/Profile.jsx";
 import { Navigate } from "react-router-dom";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
+import {Dashboard} from "./pages/Educator/Dashboard.jsx";
+import CreateCourse from "./pages/Educator/CreateCourses.jsx";
+import EditCourse from "./pages/Educator/EditCourses.jsx";
+import Courses from "./pages/Educator/Courses.jsx";
 
 export const App = () => {
   useGetCurrentUser();
@@ -32,10 +36,32 @@ export const App = () => {
         />
         <Route
           path="/forgot-password"
-          element={! userData ? <ForgetPassword /> : <Navigate to="/signup" />}
+          element={!userData ? <ForgetPassword /> : <Navigate to="/signup" />}
         />
         <Route
-          path="/edit-Profile"  element={<EditProfile/>}
+          path="/edit-Profile"
+          element={userData ? <EditProfile /> : <Navigate to="/signup" />}
+        />
+        <Route path="/Dashboard" element={<Dashboard />} />
+
+        {/* 👇 protect these like EditProfile */}
+        <Route
+          path="/create"
+          element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
+        />
+        <Route
+          path="/edit-course"
+          element={
+            userData?.role === "educator" ? (
+              <EditCourse />
+            ) : (
+              <Navigate to="/signup" />
+            )
+          }
+        />
+        <Route
+          path="/courses"
+          element={userData ? <Courses /> : <Navigate to="/signup" />}
         />
       </Routes>
     </>
