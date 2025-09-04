@@ -7,7 +7,9 @@ import { getCurrentUser, updateProfile } from "../Controller/userController.js";
 const userRouter = express.Router();
 
 userRouter.get("/getcurrentuser", isAuth, getCurrentUser);
-// Make sure this route is exactly as shown below:
+
+
 userRouter.put("/profile", isAuth, upload.single("photoUrl"), updateProfile);
 
 export default userRouter;
+ 

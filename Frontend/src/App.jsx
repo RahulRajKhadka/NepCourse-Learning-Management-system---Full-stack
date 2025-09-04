@@ -11,13 +11,15 @@ import Profile from "./pages/Profile.jsx";
 import { Navigate } from "react-router-dom";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
-import {Dashboard} from "./pages/Educator/Dashboard.jsx";
+import { Dashboard } from "./pages/Educator/Dashboard.jsx";
 import CreateCourse from "./pages/Educator/CreateCourses.jsx";
 import EditCourse from "./pages/Educator/EditCourses.jsx";
 import Courses from "./pages/Educator/Courses.jsx";
+import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
 
 export const App = () => {
   useGetCurrentUser();
+  GetCreatorCourses();
   const { userData } = useSelector((state) => state.user);
 
   return (
@@ -50,18 +52,12 @@ export const App = () => {
           element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
         />
         <Route
-          path="/edit-course"
-          element={
-            userData?.role === "educator" ? (
-              <EditCourse />
-            ) : (
-              <Navigate to="/signup" />
-            )
-          }
-        />
-        <Route
           path="/courses"
           element={userData ? <Courses /> : <Navigate to="/signup" />}
+        />
+        <Route
+          path="/editcourse/:courseId"
+          element={userData ? <EditCourse /> : <Navigate to="/signup" />}
         />
       </Routes>
     </>

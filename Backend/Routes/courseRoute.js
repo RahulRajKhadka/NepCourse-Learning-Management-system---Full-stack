@@ -1,6 +1,6 @@
 
 import express from 'express';
-import isAuth from '../Middleware/isAuth.js';
+import isAuth from '../middleware/isAuth.js';
 import { 
     createCourse, 
     getCourseById, 
@@ -15,8 +15,8 @@ const courseRouter = express.Router();
 
 courseRouter.post("/create", isAuth, createCourse);
 courseRouter.get("/getPublishedCourses", getPublishedCourses);
-courseRouter.get("/getCreatorCourses", isAuth, getCreatorCourses);
-courseRouter.put("/editCourse/:courseId", isAuth, upload.single("thumbnail"), editCourse);
+courseRouter.get("/getCreatorCourse", isAuth, getCreatorCourses);
+courseRouter.post("/editcourse/:courseId", isAuth, upload.single("thumbnail"), editCourse);
 courseRouter.get("/getCourseById/:courseId", getCourseById); // Removed isAuth if you want public access
 courseRouter.delete("/deleteCourse/:courseId", isAuth, removeCourse);
 

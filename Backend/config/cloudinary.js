@@ -1,5 +1,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -9,23 +13,61 @@ cloudinary.config({
 
 export const uploadOnCloudinary = async (filePath) => {
   try {
-    if (!filePath) return null;
+    if (!filePath) {
+      throw new Error("File path is required");
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found at path: ${filePath}`);
+    }
+
+    console.log(`Uploading file: ${filePath}`);
 
     const result = await cloudinary.uploader.upload(filePath, {
       folder: "courses",
-      resource_type: "auto"
+      resource_type: "auto",
+      use_filename: true,
+      unique_filename: false,
     });
-    
-    // Delete the temporary file after upload
+
+    console.log("Upload successful:", result.secure_url);
+
+    // Delete the temporary file after successful upload
     fs.unlinkSync(filePath);
-    
-    return result.secure_url;
+
+    return {
+      success: true,
+      url: result.secure_url,
+      public_id: result.public_id,
+      format: result.format,
+      width: result.width,
+      height: result.height,
+    };
   } catch (error) {
-    // Delete the temporary file even if upload fails
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
     console.error("Cloudinary upload error:", error);
-    throw error;
+    
+    // Delete the temporary file even if upload fails
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (unlinkError) {
+      console.error("Error deleting temporary file:", unlinkError);
+    }
+    
+    throw new Error(`Upload failed: ${error.message}`);
+  }
+};
+
+// Test connection function
+export const testCloudinaryConnection = async () => {
+  try {
+    const result = await cloudinary.api.ping();
+    console.log("Cloudinary connection successful:", result);
+    return true;
+  } catch (error) {
+    console.error("Cloudinary connection failed:", error);
+    return false;
   }
 };
