@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Bot,
   LineChart,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 const ExploreCourses = () => {
+  const navigate = useNavigate();
   const courses = [
     {
       icon: Bot,
@@ -71,6 +73,7 @@ const ExploreCourses = () => {
           className="px-6 py-3 border-2 bg-black border-white text-white rounded-xl text-lg font-light flex gap-2 mt-6"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/allcourses")}
         >
           Explore Courses
           <motion.div

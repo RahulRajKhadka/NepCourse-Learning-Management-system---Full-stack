@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { serverUrl } from "../App";
 import { useDispatch } from "react-redux";
-import { setCreateCourseData } from "../redux/courseSlice.jsx";
+import { setCreatorCourses } from "../redux/courseSlice";
 import { useSelector } from "react-redux";
 
 const GetCreatorCourses = () => {
@@ -18,7 +18,7 @@ const GetCreatorCourses = () => {
           }
         );
         console.log("Fetched creator courses:", result.data);
-        dispatch(setCreateCourseData(result.data.courses));
+        dispatch(setCreatorCourses(result.data.courses));
       } catch (error) {
         console.error("Error fetching creator courses:", error);
       }

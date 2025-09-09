@@ -16,10 +16,13 @@ import CreateCourse from "./pages/Educator/CreateCourses.jsx";
 import EditCourse from "./pages/Educator/EditCourses.jsx";
 import Courses from "./pages/Educator/Courses.jsx";
 import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
+import usePublishedCourses from "./customHooks/getPublishedCourse.js";
+import AllCourses from "./pages/AllCourses.jsx";
 
 export const App = () => {
   useGetCurrentUser();
   GetCreatorCourses();
+  usePublishedCourses();
   const { userData } = useSelector((state) => state.user);
 
   return (
@@ -43,6 +46,11 @@ export const App = () => {
         <Route
           path="/edit-Profile"
           element={userData ? <EditProfile /> : <Navigate to="/signup" />}
+        />
+
+        <Route
+          path="/allcourses"
+          element={userData ? <AllCourses /> : <Navigate to="/signup" />}
         />
         <Route path="/Dashboard" element={<Dashboard />} />
 

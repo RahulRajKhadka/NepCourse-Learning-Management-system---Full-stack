@@ -5,10 +5,15 @@ import img from "../../assets/empty.jpg";
 import axios from "axios";
 import { serverUrl } from "../../App.jsx";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { setCreatorCourses, updateCreatorCourse, removeCreatorCourse} from "../../redux/courseSlice.jsx";
 
 function EditCourse() {
   const navigate = useNavigate();
-  const { courseId } = useParams(); // Get courseId from URL params
+  const dispatch = useDispatch();
+  const { courseId } = useParams();
+  const { creatorCourses } = useSelector((state) => state.course);
   const thumb = useRef(null);
   const [isPublished, setIsPublished] = useState(true);
   const [title, setTitle] = useState("");
@@ -25,9 +30,8 @@ function EditCourse() {
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log("File selected:", file); // Debug log
+      console.log("File selected:", file);
 
-      // Validate file type
       const validImageTypes = [
         "image/jpeg",
         "image/jpg",
@@ -40,59 +44,54 @@ function EditCourse() {
         return;
       }
 
-      // Validate file size (optional - limit to 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size should be less than 5MB");
-        return;
-      }
-
+     
       setBackendImage(file);
-
-      // Create object URL and set it
       const imageUrl = URL.createObjectURL(file);
-      console.log("Created object URL:", imageUrl); // Debug log
+      console.log("Created object URL:", imageUrl);
       setFrontendImage(imageUrl);
     } else {
-      console.log("No file selected"); // Debug log
+      console.log("No file selected");
     }
   };
-const getCourseById = async () => {
-  try {
-    setLoading(true);
-    const response = await axios.get(
-      serverUrl + `/api/course/getCourseById/${courseId}`,
-      { withCredentials: true }
-    );
 
-    console.log("Full response:", response.data); // Debug log
+  const getCourseById = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        serverUrl + `/api/course/getCourseById/${courseId}`,
+        { withCredentials: true }
+      );
 
-    const { success, course } = response.data;
+      console.log("Full response:", response.data);
 
-    if (success && course) {
-      setSelectCourse(course);
-      setTitle(course.title || "");
-      setSubtitle(course.subtitle || "");
-      setDescription(course.description || "");
-      setCategory(course.category || "");
-      setLevel(course.level || "");
-      setPrice(course.price || "");
-      setIsPublished(course.isPublished || false);
+      const { success, course } = response.data;
 
-      if (course.thumbnail) {
-        setFrontendImage(course.thumbnail);
+      if (success && course) {
+        setSelectCourse(course);
+        setTitle(course.title || "");
+        setSubtitle(course.subtitle || "");
+        setDescription(course.description || "");
+        setCategory(course.category || "");
+        setLevel(course.level || "");
+        setPrice(course.price || "");
+        setIsPublished(course.isPublished || false);
+
+        if (course.thumbnail) {
+          setFrontendImage(course.thumbnail);
+        }
+      } else {
+        console.error("Course fetch failed:", response.data);
       }
-    } else {
-      console.error("Course fetch failed:", response.data);
+    } catch (error) {
+      console.error("Error fetching course:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching course:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleSaveChanges = async () => {
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", title);
@@ -102,7 +101,6 @@ const getCourseById = async () => {
       formData.append("level", level);
       formData.append("price", price);
       formData.append("isPublished", isPublished);
-
       if (backendImage) {
         formData.append("thumbnail", backendImage);
       }
@@ -110,46 +108,54 @@ const getCourseById = async () => {
       const response = await axios.post(
         serverUrl + `/api/course/editcourse/${courseId}`,
         formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { withCredentials: true }
       );
 
-      navigate("/courses");
-      setLoading(false);
-      console.log("Course updated successfully:", response.data);
-      alert("Course updated successfully!");
+      if (response.data.success) {
+        toast.success("Course updated successfully");
+        dispatch(updateCreatorCourse(response.data.course));
+        navigate("/courses");
+      } else {
+        toast.error("Error updating course");
+      }
     } catch (error) {
       console.error("Error updating course:", error);
-      alert("Error updating course. Please try again.");
+      toast.error("Error updating course");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDiscardChanges = () => {
-    // Reset form to original values
-    if (selectCourse) {
-      setTitle(selectCourse.title || "");
-      setSubtitle(selectCourse.subtitle || "");
-      setDescription(selectCourse.description || "");
-      setCategory(selectCourse.category || "");
-      setLevel(selectCourse.level || "");
-      setPrice(selectCourse.price || "");
-      setIsPublished(selectCourse.isPublished || false);
-      setFrontendImage(selectCourse.thumbnail || img);
-      setBackendImage(null);
-    }
-  };
+  const handleRemoveCourse = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.delete(
+      serverUrl + `/api/course/deleteCourse/${courseId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    
+    // Remove the course from Redux store using the new action
+    dispatch(removeCreatorCourse(courseId));
+    
+    setLoading(false);
+    toast.success("Course removed successfully");
+    navigate("/courses");
+    console.log("Course removed successfully:", response.data);
+  } catch (error) {
+    setLoading(false);
+    toast.error("Error removing course. Please try again.");
+    console.error("Error removing course:", error);
+  }
+};
 
   useEffect(() => {
     if (courseId) {
       getCourseById();
     }
-  }, [courseId]); // Remove selectCourse dependency to avoid infinite loop
+  }, [courseId]);
 
-  // Cleanup object URLs to prevent memory leaks
   useEffect(() => {
     return () => {
       if (frontendImage && frontendImage.startsWith("blob:")) {
@@ -221,6 +227,7 @@ const getCourseById = async () => {
                hover:bg-red-500 hover:shadow-xl 
                focus:ring-2 focus:ring-red-400/50 
                active:scale-95 transition-all duration-200"
+              onClick={handleRemoveCourse}
             >
               Remove Course
             </button>
@@ -418,7 +425,7 @@ const getCourseById = async () => {
               <button
                 type="button"
                 className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
-                onClick={handleDiscardChanges}
+                onClick={handleRemoveCourse}
               >
                 Discard Changes
               </button>

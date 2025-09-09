@@ -77,92 +77,75 @@ export const getCreatorCourses = async (req, res) => {
   }
 };
 
+
 export const editCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { title, subTitle, description, category, level, isPublished } =
-      req.body;
+    const { title, subtitle, description, category, level, price, isPublished } = req.body;
 
-    let course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    // Check if user is the creator
-    if (course.creator.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to edit this course",
-      });
-    }
-
-    let thumbnail;
-    if (req.file) {
-      thumbnail = await uploadOnCloudinary(req.file.path);
-    }
-
-    const updateData = {
+    const updateFields = {
       title,
-      subTitle,
+      subtitle,
       description,
       category,
       level,
-      isPublished,
+      price,
+      isPublished: isPublished === 'true'
     };
 
-    if (thumbnail) {
-      updateData.thumbnail = thumbnail;
+    if (req.file) {
+      const cloudinaryResult = await uploadOnCloudinary(req.file.path);
+      updateFields.thumbnail = cloudinaryResult.url;
     }
 
-    // Remove undefined values
-    Object.keys(updateData).forEach((key) => {
-      if (updateData[key] === undefined) {
-        delete updateData[key];
-      }
-    });
+    const updatedCourse = await Course.findByIdAndUpdate(
+      courseId,
+      updateFields,
+      { new: true }
+    );
 
-    course = await Course.findByIdAndUpdate(courseId, updateData, {
-      new: true,
-    });
+    if (!updatedCourse) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
 
     res.status(200).json({
       success: true,
       message: "Course updated successfully",
-      course,
+      course: updatedCourse
     });
+
   } catch (error) {
     console.error("Edit course error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update course",
-      error: error.message,
+      error: error.message
     });
   }
 };
 
-
 export const getCourseById = async (req, res) => {
   try {
     const { courseId } = req.params;
-    
+
     console.log("Received courseId:", courseId);
     console.log("CourseId type:", typeof courseId);
     console.log("CourseId length:", courseId.length);
-    
+
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid course ID format",
       });
     }
-    
-    const course = await Course.findById(courseId)
-      .populate("creator", "name email")
-  
+
+    const course = await Course.findById(courseId).populate(
+      "creator",
+      "name email",
+    );
 
     if (!course) {
       return res.status(404).json({

@@ -6,8 +6,11 @@ import ai from "../assets/ai.png";
 import ai1 from "../assets/SearchAi.png";
 import Logo from "../Component/Logo.jsx";
 import ExploreCourses from "../Component/ExploreCourses.jsx";
+import CardPage from "../Component/CardPage.jsx";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className="">
@@ -37,7 +40,7 @@ export const Home = () => {
             {/* Buttons wrapper */}
             <div className="absolute w-[100%] flex items-center justify-center gap-2 flex-col sm:flex-row sm:gap-3 flex-wrap top-[100%] md:top-[80%] lg:top-[30%] mt-[20px] md:mt-0 lg:mt-0 px-4">
               {/* View all Courses button */}
-              <button className="px-[15px] sm:px-[20px] py-[8px] sm:py-[10px] border-2 lg:border-white border-black rounded-2xl lg:text-white text-black text-[14px] sm:text-[16px] md:text-[18px] font-light flex gap-2 cursor-pointer items-center justify-center min-w-[140px] sm:min-w-[160px]">
+              <button className="px-[15px] sm:px-[20px] py-[8px] sm:py-[10px] border-2 lg:border-white border-black rounded-2xl lg:text-white text-black text-[14px] sm:text-[16px] md:text-[18px] font-light flex gap-2 cursor-pointer items-center justify-center min-w-[140px] sm:min-w-[160px]" onClick={()=>navigate("/allcourses")}>
                 View all Courses
                 <SiViaplay className="w-[20px] h-[20px] sm:w-[25px] sm:h-[25px] lg:w-[30px] lg:h-[30px] fill-current" />
               </button>
@@ -65,6 +68,9 @@ export const Home = () => {
           </div>
           <div>
             <ExploreCourses />
+          </div>
+          <div>
+            <CardPage />
           </div>
         </div>
       </div>
