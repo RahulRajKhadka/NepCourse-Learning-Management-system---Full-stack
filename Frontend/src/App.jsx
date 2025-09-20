@@ -18,6 +18,8 @@ import Courses from "./pages/Educator/Courses.jsx";
 import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
 import usePublishedCourses from "./customHooks/getPublishedCourse.js";
 import AllCourses from "./pages/AllCourses.jsx";
+import CreateLecture from "./pages/Educator/CreateLecture.jsx";
+import EditLecture from "./pages/Educator/EditLecture.jsx";
 
 export const App = () => {
   useGetCurrentUser();
@@ -67,6 +69,9 @@ export const App = () => {
           path="/editcourse/:courseId"
           element={userData ? <EditCourse /> : <Navigate to="/signup" />}
         />
+
+        <Route path="/createlecture/:courseId"  element={userData ? <CreateLecture /> : <Navigate to="/signup" />} />
+        <Route path="/editlecture/:courseId/:lectureId" element={userData ? <EditLecture /> : <Navigate to="/signup" />} />
       </Routes>
     </>
   );

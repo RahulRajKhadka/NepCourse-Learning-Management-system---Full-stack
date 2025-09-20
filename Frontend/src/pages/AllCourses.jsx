@@ -1,24 +1,24 @@
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Nav from "../component/Nav";
 import ai from "../assets/SearchAi.png";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import Card from "../Component/Card";
-import usePublishedCourses from "../customHooks/getPublishedCourse"; // Import the hook
+import usePublishedCourses from "../customHooks/getPublishedCourse";
 
 function AllCourses() {
   const navigate = useNavigate();
-  
-  // ✅ FIXED: Fetch published courses data
   usePublishedCourses();
-  
-  // ✅ FIXED: Use publishedCourses instead of courseData
-  const publishedCourses = useSelector((state) => state.course.publishedCourses);
-  console.log("All published courses data from redux:", publishedCourses);
-  
+
+  const publishedCoursesData = useSelector(
+    (state) => state.course.publishedCourses
+  );
+  const publishedCourses = publishedCoursesData?.courses || [];
+
   const [category, setCategory] = useState([]);
   const [filterCourses, setFilterCourses] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleCategory = (e) => {
     if (category.includes(e.target.value)) {
@@ -28,175 +28,229 @@ function AllCourses() {
     }
   };
 
-  // ✅ FIXED: Updated to work with publishedCourses array directly
+  const clearAllFilters = () => {
+    setCategory([]);
+  };
+
   useEffect(() => {
-    console.log("publishedCourses from Redux:", publishedCourses);
-    console.log("Number of published courses:", publishedCourses?.length);
     setFilterCourses(publishedCourses || []);
   }, [publishedCourses]);
 
   useEffect(() => {
-    console.log("Selected categories:", category);
-    console.log("Before filtering - courses count:", publishedCourses?.length);
     applyFilters();
-  }, [category]);
+  }, [category, publishedCourses]);
 
-  // ✅ FIXED: Updated filtering logic for direct array
   const applyFilters = () => {
     const courseCopy = publishedCourses?.slice() || [];
-    console.log("courseCopy length:", courseCopy.length);
-    
     if (category.length > 0) {
       const filtered = courseCopy.filter((course) =>
         category.includes(course.category)
       );
-      console.log("Filtered courses:", filtered.length);
       setFilterCourses(filtered);
     } else {
-      console.log("No filters applied, showing all published courses");
       setFilterCourses(courseCopy);
     }
   };
 
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
-    <>
-      <div className="flex min-h-screen bg-gray-100 text-gray-900">
-        {/* Top Navbar */}
-        <Nav />
+    <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
+      <Nav />
 
-        {/* Sidebar */}
-        <aside className="w-72 bg-white border-r h-screen shadow-md p-6 flex flex-col">
-          {/* Header with back button */}
-          <h2 className="flex items-center gap-3 mb-6 font-semibold text-lg text-gray-700">
-            <FaArrowLeft
-              className="cursor-pointer text-gray-600 hover:text-black transition"
-              onClick={() => navigate("/")}
-            />
-            Filter by Categories
-          </h2>
-
-          {/* Filter Section */}
-          <form
-            action=""
-            onSubmit={(e) => e.preventDefault()}
-            className="space-y-4 text-sm bg-gray-50 border rounded-xl p-5 shadow-sm"
+      <div className="flex flex-1 relative ">
+        {!isSidebarOpen && (
+          <button
+            className="md:hidden fixed right-5 top-25 bg-black text-white px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-800 transition-colors"
+            onClick={() => setIsSidebarOpen(true)}
           >
-            {/* App Development */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="App Development"
-              />
-              <span>App Development</span>
-            </label>
+            Show Filters
+          </button>
+        )}
 
-            {/* Web Development */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="Web Development"
-              />
-              <span>Web Development</span>
-            </label>
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity"
+            onClick={closeSidebar}
+          />
+        )}
 
-            {/* UI/UX */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="UI/UX"
+        <aside
+          className={`
+            fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white border-r shadow-xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            md:translate-x-0 md:static md:w-72 md:shadow-lg md:max-w-none
+          `}
+        >
+          <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <FaArrowLeft
+                className="cursor-pointer text-gray-600 hover:text-black transition-colors md:block hidden"
+                onClick={() => navigate("/")}
               />
-              <span>UI/UX</span>
-            </label>
-
-            {/* AI & ML */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="AI / ML"
-              />
-              <span>AI / ML</span>
-            </label>
-
-            {/* Data Science */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="Data Science"
-              />
-              <span>Data Science</span>
-            </label>
-
-            {/* Cybersecurity */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="Cybersecurity"
-              />
-              <span>Cybersecurity</span>
-            </label>
-
-            {/* Cloud Computing */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-black"
-                onChange={toggleCategory}
-                value="Cloud Computing"
-              />
-              <span>Cloud Computing</span>
-            </label>
-
+              <h2 className="font-semibold text-lg text-gray-800">
+                Filter Courses
+              </h2>
+            </div>
             <button
-              type="submit"
-              className="flex items-center justify-center gap-2 w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition font-medium"
+              className="md:hidden text-gray-600 hover:text-black transition-colors p-1"
+              onClick={closeSidebar}
             >
-              Search with AI
-              <img
-                src={ai}
-                alt="AI Search"
-                className="w-[35px] h-[35px] rounded-full"
-              />
+              <FaTimes className="w-5 h-5" />
             </button>
-          </form>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {category.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    Active Filters ({category.length})
+                  </span>
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {category.map((cat) => (
+                    <span
+                      key={cat}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-black text-white text-xs rounded-full"
+                    >
+                      {cat}
+                      <button
+                        onClick={() =>
+                          toggleCategory({ target: { value: cat } })
+                        }
+                        className="ml-1 hover:bg-gray-700 rounded-full p-0.5"
+                      >
+                        <FaTimes className="w-2 h-2" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+              <h3 className="font-medium text-gray-800 text-sm uppercase tracking-wide">
+                Categories
+              </h3>
+              <div className="space-y-3 bg-gray-50 border rounded-xl p-4  ">
+                {[
+                  "App Development",
+                  "Web Development",
+                  "UI/UX",
+                  "AI / ML",
+                  "Data Science",
+                  "Cybersecurity",
+                  "Cloud Computing",
+                ].map((cat) => (
+                  <label
+                    key={cat}
+                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-black rounded"
+                      onChange={toggleCategory}
+                      value={cat}
+                      checked={category.includes(cat)}
+                    />
+                    <span className="text-sm text-gray-700 select-none">
+                      {cat}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
+              >
+                Search with AI
+                <img
+                  src={ai}
+                  alt="AI Search"
+                  className="w-6 h-6 rounded-full"
+                />
+              </button>
+            </form>
+
+            <div className="md:hidden pt-4 border-t">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
+              >
+                <FaArrowLeft className="w-4 h-4" />
+                <span className="text-sm">Back to Home</span>
+              </button>
+            </div>
+          </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 md:py-8 overflow-hidden">
+          <div className="md:hidden h-16"></div>
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+              All Courses
+            </h1>
+            <p className="text-gray-600 text-sm md:text-base">
+              {filterCourses.length > 0
+                ? `Showing ${filterCourses.length} course${
+                    filterCourses.length !== 1 ? "s" : ""
+                  }${category.length > 0 ? ` in selected categories` : ""}`
+                : "No courses found"}
+            </p>
+          </div>
+
           {filterCourses?.length > 0 ? (
-            filterCourses.map((course, index) => (
-              <Card
-                key={course._id || index}
-                course={course}
-                thumbnail={course.thumbnail}
-                price={course.price}
-                id={course._id}
-                title={course.title}
-                description={course.description}
-                category={course.category}
-                level={course.level}
-                enrolledStudents={course.enrolledStudents}
-              />
-            ))
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {filterCourses.map((course, index) => (
+                <Card
+                  key={course._id || index}
+                  course={course}
+                  thumbnail={course.thumbnail}
+                  price={course.price}
+                  id={course._id}
+                  title={course.title}
+                  description={course.description}
+                  category={course.category}
+                  level={course.level}
+                  enrolledStudents={course.enrolledStudents}
+                />
+              ))}
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-gray-500 text-lg">Loading courses...</p>
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center"></div>
+              <div className="text-center">
+                <p className="text-gray-500 text-lg font-medium">
+                  {publishedCourses?.length === 0
+                    ? "No courses available"
+                    : category.length > 0
+                    ? "No courses match your filters"
+                    : "Loading courses..."}
+                </p>
+                {category.length > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="mt-2 text-blue-600 hover:text-blue-800 underline text-sm"
+                  >
+                    Clear filters and show all courses
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </main>
       </div>
-    </>
+    </div>
   );
 }
 

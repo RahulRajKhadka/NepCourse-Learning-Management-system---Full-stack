@@ -188,7 +188,9 @@ function EditCourse() {
         </div>
 
         <div className="space-x-2 space-y-2">
-          <button className="bg-black text-white px-4 py-2 rounded">
+          <button className="bg-black text-white px-4 py-2 rounded"
+            onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
+          >
             Go to Lecture pages
           </button>
         </div>
