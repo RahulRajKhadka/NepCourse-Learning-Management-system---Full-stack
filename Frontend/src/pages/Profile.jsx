@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";  // ✅ should come from react-router-dom, not redux
+import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
 const Profile = () => {
@@ -17,8 +17,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg relative">
-
-        {/* 🔙 Back Arrow */}
         <button
           onClick={() => navigate("/")}
           className="absolute top-4 left-4 text-gray-600 hover:text-indigo-600 text-2xl"
@@ -27,8 +25,7 @@ const Profile = () => {
         </button>
 
         <div className="flex flex-col items-center text-center">
-          {/* Profile Image */}
-          {userData.photo ? (
+          {userData.photoUrl ? (
             <img
               src={userData.photoUrl}
               alt="Profile"
@@ -40,7 +37,6 @@ const Profile = () => {
             </div>
           )}
 
-          {/* User Name */}
           <h2 className="mt-4 text-2xl font-bold text-gray-800">
             {userData.name || "No Name"}
           </h2>
@@ -70,7 +66,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* ✏️ Edit Profile Button */}
         <div className="mt-6 flex justify-center">
           <button
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"

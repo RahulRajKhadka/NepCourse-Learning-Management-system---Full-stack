@@ -42,7 +42,7 @@ function Nav() {
         withCredentials: true,
       });
 
-      dispatch(clearUserData()); // ✅ clears Redux + localStorage
+      dispatch(clearUserData());
 
       toast.success(result.data.message || "Logout successful");
       navigate("/");
@@ -58,7 +58,6 @@ function Nav() {
     setDropdownOpen(false);
   };
 
-  // More robust user check
   const isUserLoggedIn =
     userData &&
     userData !== null &&
@@ -70,7 +69,6 @@ function Nav() {
   return (
     <nav className="w-full fixed top-0 left-0 bg-gradient-to-r from-black via-blue-800 to-blue-500 z-10 px-5 py-3">
       <div className="flex items-center justify-between">
-        {/* Logo */}
         <div className="flex items-center">
           <img
             src={logo}
@@ -84,16 +82,13 @@ function Nav() {
           />
         </div>
 
-        {/* Debug Info - Remove in production */}
         <div className="hidden lg:block bg-white/20 text-white text-xs p-2 rounded">
           User: {isUserLoggedIn ? "Logged In" : "Not Logged In"}
         </div>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-4">
           {isUserLoggedIn ? (
             <>
-              {/* Dashboard Button - Only for educators */}
               {(userData?.role === "educator" ||
                 userData?.role === "teacher") && (
                 <button
@@ -121,20 +116,26 @@ function Nav() {
                 </button>
               )}
 
-              {/* User Menu */}
               <div
                 className="relative group"
                 onMouseEnter={() => setDropdownOpen(true)}
                 onMouseLeave={() => setDropdownOpen(false)}
               >
-                <div className="w-[45px] h-[45px] rounded-full text-white flex items-center justify-center text-[20px] border-2 bg-black border-white cursor-pointer">
-                  {userData?.name?.charAt(0)?.toUpperCase() ||
-                    userData?.email?.charAt(0)?.toUpperCase() ||
-                    userData?.username?.charAt(0)?.toUpperCase() ||
-                    "U"}
-                </div>
+                {userData?.photoUrl ? (
+                  <img
+                    src={userData.photoUrl}
+                    alt="Profile"
+                    className="w-[45px] h-[45px] rounded-full border-2 border-white cursor-pointer object-cover"
+                  />
+                ) : (
+                  <div className="w-[45px] h-[45px] rounded-full text-white flex items-center justify-center text-[20px] border-2 bg-black border-white cursor-pointer">
+                    {userData?.name?.charAt(0)?.toUpperCase() ||
+                      userData?.email?.charAt(0)?.toUpperCase() ||
+                      userData?.username?.charAt(0)?.toUpperCase() ||
+                      "U"}
+                  </div>
+                )}
 
-                {/* Dropdown */}
                 <div
                   className={`absolute top-full mt-1 right-0 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 transform transition-all duration-300 z-50 ${
                     dropdownOpen
@@ -151,10 +152,19 @@ function Nav() {
 
                   <button
                     className="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-                    onClick={() => handleNavigation("/courses")}
+                    onClick={() => handleNavigation("/allcourses")}
                   >
-                    My Courses
+                    Browse Courses
                   </button>
+
+                  {(userData?.role === "educator" || userData?.role === "teacher") && (
+                    <button
+                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+                      onClick={() => handleNavigation("/courses")}
+                    >
+                      My Courses
+                    </button>
+                  )}
 
                   <div className="border-t border-gray-200 my-2"></div>
 
@@ -169,7 +179,6 @@ function Nav() {
             </>
           ) : (
             <>
-              {/* Login Button */}
               <button
                 className="px-4 py-2 border-2 border-white text-white 
                 bg-gradient-to-r from-black via-blue-800 to-blue-500 
@@ -183,7 +192,6 @@ function Nav() {
           )}
         </div>
 
-        {/* Mobile Hamburger Icon */}
         <div className="md:hidden flex items-center">
           {menuOpen ? (
             <HiX
@@ -199,19 +207,25 @@ function Nav() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden mt-4 flex flex-col gap-3 bg-black/80 p-4 rounded-lg">
           {isUserLoggedIn ? (
             <>
-              {/* User Info */}
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-[45px] h-[45px] rounded-full text-white flex items-center justify-center text-[20px] border-2 bg-black border-white">
-                  {userData?.name?.charAt(0)?.toUpperCase() ||
-                    userData?.email?.charAt(0)?.toUpperCase() ||
-                    userData?.username?.charAt(0)?.toUpperCase() ||
-                    "U"}
-                </div>
+                {userData?.photoUrl ? (
+                  <img
+                    src={userData.photoUrl}
+                    alt="Profile"
+                    className="w-[80px] h-[80px] rounded-full border-2 border-white object-cover"
+                  />
+                ) : (
+                  <div className="w-[45px] h-[45px] rounded-full text-white flex items-center justify-center text-[20px] border-2 bg-black border-white">
+                    {userData?.name?.charAt(0)?.toUpperCase() ||
+                      userData?.email?.charAt(0)?.toUpperCase() ||
+                      userData?.username?.charAt(0)?.toUpperCase() ||
+                      "U"}
+                  </div>
+                )}
                 <div className="text-white">
                   <p className="text-sm font-medium">
                     {userData?.name || userData?.username || "User"}
@@ -229,10 +243,18 @@ function Nav() {
 
               <button
                 className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
-                onClick={() => handleNavigation("/courses")}
+                onClick={() => handleNavigation("/allcourses")}
               >
-                My Courses
               </button>
+
+              {(userData?.role === "educator" || userData?.role === "teacher") && (
+                <button
+                  className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
+                  onClick={() => handleNavigation("/courses")}
+                >
+                  My Courses
+                </button>
+              )}
 
               {(userData?.role === "educator" ||
                 userData?.role === "teacher") && (

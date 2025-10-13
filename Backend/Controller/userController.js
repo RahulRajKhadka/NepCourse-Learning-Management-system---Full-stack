@@ -1,7 +1,5 @@
-// In userController.js
 import User from "../Model/userModel.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
-
 
 export const getCurrentUser = async (req, res) => {
   try {
@@ -45,7 +43,6 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
-
 export const updateProfile = async (req, res) => {
   try {
     console.log("Update profile request received");
@@ -56,11 +53,13 @@ export const updateProfile = async (req, res) => {
     const { name, description } = req.body;
     let photoUrl = null;
 
-    // Handle file upload if exists
     if (req.file) {
       console.log("Processing file upload");
+      console.log("File path:", req.file.path);
+      
       try {
-        photoUrl = await uploadBufferToCloudinary(req.file.buffer);
+        const uploadResult = await uploadOnCloudinary(req.file.path);
+        photoUrl = uploadResult.url;
         console.log("File uploaded to Cloudinary:", photoUrl);
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError);
@@ -71,7 +70,6 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // Prepare update data
     const updateData = {};
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
@@ -79,7 +77,6 @@ export const updateProfile = async (req, res) => {
 
     console.log("Updating user with data:", updateData);
 
-    // Update user
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
@@ -91,6 +88,7 @@ export const updateProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
+      photoUrl: photoUrl,
       user: {
         _id: updatedUser._id,
         name: updatedUser.name,

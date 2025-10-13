@@ -6,7 +6,6 @@ import Card from "../Component/Card"; // ✅ Import the Card component
 const CardPage = () => {
   // ✅ FIXED: Call the custom hook to fetch data
   usePublishedCourses();
-  
 
   const courseData = useSelector((state) => state.course.creatorCourses);
   console.log("Redux courseData:", courseData);

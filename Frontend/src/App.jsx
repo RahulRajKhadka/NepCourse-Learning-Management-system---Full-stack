@@ -20,6 +20,11 @@ import usePublishedCourses from "./customHooks/getPublishedCourse.js";
 import AllCourses from "./pages/AllCourses.jsx";
 import CreateLecture from "./pages/Educator/CreateLecture.jsx";
 import EditLecture from "./pages/Educator/EditLecture.jsx";
+import ViewCourses from "./pages/ViewCourses.jsx";
+import PaymentPage from "./payments/Payment.jsx";
+import Success from "./payments/Sucess.jsx";
+import Failure from "./payments/Failure.jsx";
+import MyCourses from "./pages/MyEnrolledCourses.jsx"
 
 export const App = () => {
   useGetCurrentUser();
@@ -49,13 +54,11 @@ export const App = () => {
           path="/edit-Profile"
           element={userData ? <EditProfile /> : <Navigate to="/signup" />}
         />
-
         <Route
           path="/allcourses"
           element={userData ? <AllCourses /> : <Navigate to="/signup" />}
         />
         <Route path="/Dashboard" element={<Dashboard />} />
-
         {/* 👇 protect these like EditProfile */}
         <Route
           path="/create"
@@ -69,9 +72,28 @@ export const App = () => {
           path="/editcourse/:courseId"
           element={userData ? <EditCourse /> : <Navigate to="/signup" />}
         />
-
-        <Route path="/createlecture/:courseId"  element={userData ? <CreateLecture /> : <Navigate to="/signup" />} />
-        <Route path="/editlecture/:courseId/:lectureId" element={userData ? <EditLecture /> : <Navigate to="/signup" />} />
+        <Route
+          path="/createlecture/:courseId"
+          element={userData ? <CreateLecture /> : <Navigate to="/signup" />}
+        />
+        <Route
+          path="/editlecture/:courseId/:lectureId"
+          element={userData ? <EditLecture /> : <Navigate to="/signup" />}
+        />
+        <Route
+          path="/course/:courseId"
+          element={
+            userData?.role === "educator" ? (
+              <ViewCourses />
+            ) : (
+              <Navigate to="/signup" />
+            )
+          }
+        />
+        <Route path="/payment/:courseId" element={<PaymentPage />} />
+        <Route path="/payment-success" element={<Success />} />
+        <Route path="/payment-failure" element={<Failure />} />
+        <Route path="/my-courses" element={<MyCourses />} />
       </Routes>
     </>
   );

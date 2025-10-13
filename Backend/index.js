@@ -6,6 +6,9 @@ import connectDb from "./config/connectDB.js";
 import authRouter from "./Routes/authRoute.js";
 import cors from "cors";
 import userRouter from "./Routes/userRoute.js";
+import paymentRouter from "./Routes/paymentRoutes.js";
+import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
+
 
 dotenv.config();
 
@@ -15,15 +18,20 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/course", courseRouter);
+app.use("/api/payment", paymentRouter);
+app.use("/api/enrollment", enrollmentRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Hello from the server");

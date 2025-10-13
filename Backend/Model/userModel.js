@@ -1,4 +1,4 @@
-// Backend - Updated User Schema (models/User.js)
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function() {
-      // Only require password for local auth users
       return this.authProvider === 'local' || !this.authProvider;
     },
     minlength: 6,
@@ -45,13 +44,17 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+  }],
 }, {
   timestamps: true,
 });
 
-// Hash password before saving (only for local auth users)
+
 userSchema.pre('save', async function(next) {
-  // Only hash password if it's modified and user is local auth
   if (!this.isModified('password') || this.authProvider === 'google') {
     return next();
   }
@@ -65,12 +68,24 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Compare password method (only for local auth users)
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
   if (this.authProvider === 'google') {
     throw new Error('Google users do not have passwords');
   }
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.addEnrolledCourse = async function(courseId) {
+  if (!this.enrolledCourses.includes(courseId)) {
+    this.enrolledCourses.push(courseId);
+    await this.save();
+  }
+  return this;
+};
+
+userSchema.methods.isEnrolledIn = function(courseId) {
+  return this.enrolledCourses.some(id => id.toString() === courseId.toString());
 };
 
 export default mongoose.model('User', userSchema);

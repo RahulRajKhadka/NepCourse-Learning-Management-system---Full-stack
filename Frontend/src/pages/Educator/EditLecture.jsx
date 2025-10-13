@@ -62,7 +62,7 @@ function EditLecture() {
           );
           dispatch(setAllLectures(response.data.lectures || []));
         } catch (error) {
-          toast.error("Failed to fetch lecture data");
+          toast.error("Failed to fetch lecture data",error);
         }
       }
     };
@@ -132,7 +132,8 @@ function EditLecture() {
       dispatch(setAllLectures(lecturesResponse.data.lectures || []));
 
       toast.success("Lecture updated successfully");
-      navigate(`/createlecture/${courseId}`);
+navigate("/courses"); 
+
     } catch (error) {
       toast.error(
         "Error updating lecture: " +

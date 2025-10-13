@@ -2,6 +2,7 @@ import Course from "../Model/courseModel.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import Lecture from "../Model/lectureModel.js";
+import User from "../Model/userModel.js"
 
 export const createCourse = async (req, res) => {
   try {
@@ -36,13 +37,20 @@ export const createCourse = async (req, res) => {
     });
   }
 };
-
 export const getPublishedCourses = async (req, res) => {
   try {
+    console.log("Fetching published courses with lectures...");
+    
     const courses = await Course.find({ isPublished: true })
-      .populate("creator", "name email")
-      .sort({ createdAt: -1 });
-
+      .populate("lectures");
+    
+    console.log("Found courses:", courses.length);
+    courses.forEach((course, index) => {
+      console.log(`Course ${index + 1}: ${course.title}`);
+      console.log(`Lectures count: ${course.lectures?.length || 0}`);
+      console.log(`Lectures:`, course.lectures);
+    });
+      
     res.status(200).json({
       success: true,
       courses,
@@ -60,9 +68,9 @@ export const getPublishedCourses = async (req, res) => {
 export const getCreatorCourses = async (req, res) => {
   try {
     const userId = req.user._id;
-    const courses = await Course.find({ creator: userId }).sort({
-      createdAt: -1,
-    });
+    const courses = await Course.find({ creator: userId })
+      .populate('lectures')  // Add this line
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -77,7 +85,6 @@ export const getCreatorCourses = async (req, res) => {
     });
   }
 };
-
 
 export const editCourse = async (req, res) => {
   try {
@@ -143,10 +150,10 @@ export const getCourseById = async (req, res) => {
       });
     }
 
-    const course = await Course.findById(courseId).populate(
-      "creator",
-      "name email",
-    );
+   const course = await Course.findById(courseId)
+  .populate("creator", "name email")
+  .populate("lectures");  // Add this line
+  
 
     if (!course) {
       return res.status(404).json({
@@ -248,7 +255,9 @@ export const getCourseLectures = async (req, res) => {
   }
 };
 
-// Fixed createLecture function with better error handling
+
+
+
 export const createLecture = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -274,6 +283,9 @@ export const createLecture = async (req, res) => {
       });
     }
 
+    console.log("Course found:", course.title);
+    console.log("Course lectures before:", course.lectures);
+
     const lectureData = {
       title,
       description: description || "",
@@ -289,19 +301,21 @@ export const createLecture = async (req, res) => {
     }
 
     const lecture = await Lecture.create(lectureData);
+    console.log("Lecture created:", lecture);
 
     // Add lecture ID to course's lectures array
     course.lectures.push(lecture._id);
-    await course.save();
-
-    console.log("Lecture created:", lecture);
+    const savedCourse = await course.save();
+    
+    console.log("Course lectures after:", savedCourse.lectures);
+    console.log("Lecture added to course successfully");
 
     res.status(201).json({
       success: true,
       message: "Lecture created successfully",
       lecture,
     });
-   
+
   } catch (error) {
     console.error("Create lecture error:", error);
     res.status(500).json({
@@ -311,6 +325,7 @@ export const createLecture = async (req, res) => {
     });
   }
 };
+
 export const editLecture = async (req, res) => {
   try {
     console.log("=== EDIT LECTURE DEBUG ===");
@@ -460,6 +475,34 @@ export const removeLecture = async (req, res) => {
       success: false,
       message: "Failed to remove lecture",
       error: error.message,
+    });
+  }
+};
+
+export const getCreatorById = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    
+    const user = await User.findById(userId).select("-password"); 
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: "Creator found successfully",
+      creator: user
+    });
+    
+  } catch (error) {
+    console.error("Get creator error:", error);
+    return res.status(500).json({
+      success: false,
+      message: `Failed to get creator: ${error.message}`
     });
   }
 };

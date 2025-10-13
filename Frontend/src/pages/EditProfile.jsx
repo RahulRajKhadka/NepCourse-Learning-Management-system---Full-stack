@@ -5,12 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FiUser, FiUpload } from "react-icons/fi";
 import { setUserData } from "../redux/userSlice.jsx";
+import { serverUrl } from "../App.jsx";
 
 const EditProfile = () => {
   const { userData } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -34,9 +35,9 @@ const EditProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear messages when user starts typing
     if (error) setError("");
@@ -51,48 +52,23 @@ const EditProfile = () => {
         setError("File size must be less than 5MB");
         return;
       }
-      
+
       // Validate file type
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith("image/")) {
         setError("Please select an image file");
         return;
       }
-      
-      setFormData(prev => ({ ...prev, photo: file }));
+
+      setFormData((prev) => ({ ...prev, photo: file }));
       setError("");
       setSuccess("");
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    try {
-      const response = await fetch('/api/upload-image', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Adjust based on your auth system
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const data = await response.json();
-      return data.imageUrl; // Adjust based on your API response structure
-    } catch (error) {
-      console.error('Image upload error:', error);
-      throw error;
     }
   };
 
@@ -103,52 +79,55 @@ const EditProfile = () => {
     setSuccess("");
 
     try {
-      let photoUrl = userData.photoUrl; // Keep existing photo URL by default
+      // Create FormData for multipart/form-data request
+      const submitFormData = new FormData();
       
-      // Upload new image if one was selected
+      // Add text fields
+      submitFormData.append('name', formData.name.trim());
+      submitFormData.append('description', formData.description.trim());
+      
+      // Add photo if selected
       if (formData.photo) {
-        photoUrl = await uploadImage(formData.photo);
+        submitFormData.append('photoUrl', formData.photo); // Note: using 'photoUrl' to match your route
       }
 
-      // Prepare updated user data
+      console.log('Submitting form data...');
+      
+      const response = await fetch(`${serverUrl}/api/user/profile`, {
+        method: "PUT",
+        credentials: 'include', // This ensures cookies are sent with the request
+        body: submitFormData,
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      console.log('Success response:', responseData);
+
+      setSuccess("Profile updated successfully!");
+
+      // Update Redux store with the response data or construct it
       const updatedUserData = {
         ...userData,
         name: formData.name.trim(),
         description: formData.description.trim(),
-        photoUrl: photoUrl,
+        photoUrl: responseData.photoUrl || userData.photoUrl, // Use server response or keep existing
       };
 
-      // Update user profile in database
-      const response = await fetch(`/api/users/${userData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Adjust based on your auth system
-        },
-        body: JSON.stringify({
-          name: updatedUserData.name,
-          description: updatedUserData.description,
-          photoUrl: updatedUserData.photoUrl,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      
-      // Update Redux store with new user data
       dispatch(setUserData(updatedUserData));
-      
-      
+
       // Navigate back to profile page after a short delay
       setTimeout(() => {
         navigate("/profile");
       }, 1500);
 
     } catch (error) {
-      console.error('Profile update error:', error);
+      console.error("Profile update error:", error);
       setError(error.message || "Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
@@ -208,7 +187,7 @@ const EditProfile = () => {
                   <FiUser />
                 </div>
               )}
-              
+
               <label className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-indigo-700 transition">
                 <FiUpload className="text-lg" />
                 <input
@@ -220,7 +199,9 @@ const EditProfile = () => {
                 />
               </label>
             </div>
-            <p className="text-sm text-gray-500">Click the icon to upload a new photo</p>
+            <p className="text-sm text-gray-500">
+              Click the icon to upload a new photo
+            </p>
           </div>
 
           {/* Name Field */}
