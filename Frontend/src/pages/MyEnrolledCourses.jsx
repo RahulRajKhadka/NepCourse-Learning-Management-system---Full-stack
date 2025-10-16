@@ -107,7 +107,9 @@ export default function MyCourses() {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Courses</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  Total Courses
+                </p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
                   {enrollments.length}
                 </p>
@@ -133,7 +135,11 @@ export default function MyCourses() {
               <div>
                 <p className="text-gray-600 text-sm font-medium">In Progress</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                  {enrollments.filter((e) => e.status === "active" && e.progress > 0).length}
+                  {
+                    enrollments.filter(
+                      (e) => e.status === "active" && e.progress > 0
+                    ).length
+                  }
                 </p>
               </div>
               <FaClock className="w-12 h-12 text-purple-500 opacity-20" />
@@ -174,7 +180,7 @@ export default function MyCourses() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  
+
                   {/* Status Badge */}
                   <div className="absolute top-4 right-4">
                     <span

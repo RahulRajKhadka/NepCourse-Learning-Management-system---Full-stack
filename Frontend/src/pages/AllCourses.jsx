@@ -5,16 +5,16 @@ import ai from "../assets/SearchAi.png";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import Card from "../Component/Card";
-import usePublishedCourses from "../customHooks/getPublishedCourse";
+import useAllPublishedCourses from "../customHooks/useAllPublishedCourses"; // ✅ Correct hook name
 
 function AllCourses() {
   const navigate = useNavigate();
-  usePublishedCourses();
+  useAllPublishedCourses(); // ✅ Fetch all published courses from all educators
 
-  const publishedCoursesData = useSelector(
-    (state) => state.course.publishedCourses
+  // ✅ FIXED: Use the correct Redux path
+  const publishedCourses = useSelector(
+    (state) => state.course.allPublishedCourses
   );
-  const publishedCourses = publishedCoursesData?.courses || [];
 
   const [category, setCategory] = useState([]);
   const [filterCourses, setFilterCourses] = useState([]);
@@ -248,7 +248,7 @@ function AllCourses() {
               </div>
             </div>
           )}
-        </main>
+        </main>+
       </div>
     </div>
   );

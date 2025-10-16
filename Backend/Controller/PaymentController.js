@@ -256,7 +256,7 @@ export const esewaFailure = (req, res) => {
   return res.redirect(302, `${clientBase}/payment-failure`);
 };
 
-// ✅ FIXED: Khalti Return with Enrollment Creation
+
 export const khaltiReturn = async (req, res) => {
   try {
     const clientBase = process.env.CLIENT_URL || "http://localhost:5173";
@@ -291,7 +291,7 @@ export const khaltiReturn = async (req, res) => {
       );
 
       if (data?.status === "Completed") {
-        // ✅ CREATE ENROLLMENT
+      
         if (courseId && userId) {
           try {
             let enrollment = await Enrollment.findOne({ 

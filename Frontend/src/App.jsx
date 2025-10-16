@@ -16,7 +16,7 @@ import CreateCourse from "./pages/Educator/CreateCourses.jsx";
 import EditCourse from "./pages/Educator/EditCourses.jsx";
 import Courses from "./pages/Educator/Courses.jsx";
 import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
-import usePublishedCourses from "./customHooks/getPublishedCourse.js";
+import usePublishedCourses from "./customHooks/useAllPublishedCourses.js";
 import AllCourses from "./pages/AllCourses.jsx";
 import CreateLecture from "./pages/Educator/CreateLecture.jsx";
 import EditLecture from "./pages/Educator/EditLecture.jsx";
@@ -24,7 +24,9 @@ import ViewCourses from "./pages/ViewCourses.jsx";
 import PaymentPage from "./payments/Payment.jsx";
 import Success from "./payments/Sucess.jsx";
 import Failure from "./payments/Failure.jsx";
-import MyCourses from "./pages/MyEnrolledCourses.jsx"
+import MyCourses from "./pages/MyEnrolledCourses.jsx";
+import ViewLecture from "./pages/ViewLecture.jsx";
+import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
 
 export const App = () => {
   useGetCurrentUser();
@@ -78,7 +80,7 @@ export const App = () => {
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
-          element={userData ? <EditLecture /> : <Navigate to="/signup" />}
+          element={userData ?.role === "educator" ? <EditLecture /> : <Navigate to="/signup" />}
         />
         <Route
           path="/course/:courseId"
@@ -94,6 +96,8 @@ export const App = () => {
         <Route path="/payment-success" element={<Success />} />
         <Route path="/payment-failure" element={<Failure />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/viewlecture/:courseId" element={<ViewLecture />} />
+        <Route path="/my-enrolled-courses" element={<MyEnrolledCourse />} />
       </Routes>
     </>
   );

@@ -23,11 +23,7 @@ const lectureSlice = createSlice({
   },
 });
 
-export const {
-  setAllLectures,
-  addLecture,
-  removeLecture,
-  clearLectures,
-} = lectureSlice.actions;
+export const { setAllLectures, addLecture, removeLecture, clearLectures } =
+  lectureSlice.actions;
 
 export default lectureSlice.reducer;

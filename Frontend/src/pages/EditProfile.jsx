@@ -81,33 +81,35 @@ const EditProfile = () => {
     try {
       // Create FormData for multipart/form-data request
       const submitFormData = new FormData();
-      
+
       // Add text fields
-      submitFormData.append('name', formData.name.trim());
-      submitFormData.append('description', formData.description.trim());
-      
+      submitFormData.append("name", formData.name.trim());
+      submitFormData.append("description", formData.description.trim());
+
       // Add photo if selected
       if (formData.photo) {
-        submitFormData.append('photoUrl', formData.photo); // Note: using 'photoUrl' to match your route
+        submitFormData.append("photoUrl", formData.photo); // Note: using 'photoUrl' to match your route
       }
 
-      console.log('Submitting form data...');
-      
+      console.log("Submitting form data...");
+
       const response = await fetch(`${serverUrl}/api/user/profile`, {
         method: "PUT",
-        credentials: 'include', // This ensures cookies are sent with the request
+        credentials: "include", // This ensures cookies are sent with the request
         body: submitFormData,
       });
 
-      console.log('Response status:', response.status);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server error: ${response.status}`);
+        throw new Error(
+          errorData.message || `Server error: ${response.status}`
+        );
       }
 
       const responseData = await response.json();
-      console.log('Success response:', responseData);
+      console.log("Success response:", responseData);
 
       setSuccess("Profile updated successfully!");
 
@@ -125,7 +127,6 @@ const EditProfile = () => {
       setTimeout(() => {
         navigate("/profile");
       }, 1500);
-
     } catch (error) {
       console.error("Profile update error:", error);
       setError(error.message || "Failed to update profile. Please try again.");

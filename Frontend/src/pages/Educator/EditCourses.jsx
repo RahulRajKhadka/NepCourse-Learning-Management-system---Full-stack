@@ -7,7 +7,12 @@ import { serverUrl } from "../../App.jsx";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setCreatorCourses, updateCreatorCourse, removeCreatorCourse} from "../../redux/courseSlice.jsx";
+import {
+  updateCreatorCourse,
+  removeCreatorCourse,
+  updateEducatorPublishedCourse,
+  removeEducatorPublishedCourse,
+} from "../../redux/courseSlice.jsx";
 
 function EditCourse() {
   const navigate = useNavigate();
@@ -15,7 +20,7 @@ function EditCourse() {
   const { courseId } = useParams();
   const { creatorCourses } = useSelector((state) => state.course);
   const thumb = useRef(null);
-  const [isPublished, setIsPublished] = useState(true);
+  const [isPublished, setIsPublished] = useState(false);
   const [title, setTitle] = useState("");
   const [selectCourse, setSelectCourse] = useState(null);
   const [description, setDescription] = useState("");
@@ -44,7 +49,6 @@ function EditCourse() {
         return;
       }
 
-     
       setBackendImage(file);
       const imageUrl = URL.createObjectURL(file);
       console.log("Created object URL:", imageUrl);
@@ -57,8 +61,9 @@ function EditCourse() {
   const getCourseById = async () => {
     try {
       setLoading(true);
+      // ✅ Fixed: Added 's' to /api/courses/
       const response = await axios.get(
-        serverUrl + `/api/course/getCourseById/${courseId}`,
+        serverUrl + `/api/courses/getCourseById/${courseId}`,
         { withCredentials: true }
       );
 
@@ -69,7 +74,8 @@ function EditCourse() {
       if (success && course) {
         setSelectCourse(course);
         setTitle(course.title || "");
-        setSubtitle(course.subtitle || "");
+        // ✅ Fixed: Changed to course.subTitle (camelCase)
+        setSubtitle(course.subTitle || "");
         setDescription(course.description || "");
         setCategory(course.category || "");
         setLevel(course.level || "");
@@ -81,21 +87,23 @@ function EditCourse() {
         }
       } else {
         console.error("Course fetch failed:", response.data);
+        toast.error("Failed to load course");
       }
     } catch (error) {
       console.error("Error fetching course:", error);
+      toast.error("Error loading course");
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleSaveChanges = async () => {
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", title);
-      formData.append("subtitle", subtitle);
+      // ✅ Fixed: Changed to "subTitle" (camelCase)
+      formData.append("subTitle", subtitle);
       formData.append("description", description);
       formData.append("category", category);
       formData.append("level", level);
@@ -105,50 +113,116 @@ function EditCourse() {
         formData.append("thumbnail", backendImage);
       }
 
-      const response = await axios.post(
-        serverUrl + `/api/course/editcourse/${courseId}`,
+      // ✅ Fixed: Changed POST to PUT and added 's' to /api/courses/
+      const response = await axios.put(
+        serverUrl + `/api/courses/editcourse/${courseId}`,
         formData,
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          }
+        }
       );
 
       if (response.data.success) {
+        const updatedCourse = response.data.course;
+
+        // Update creator courses
+        dispatch(updateCreatorCourse(updatedCourse));
+
+        // Handle published/unpublished courses
+        if (updatedCourse.isPublished) {
+          dispatch(updateEducatorPublishedCourse(updatedCourse));
+        } else {
+          dispatch(removeEducatorPublishedCourse(updatedCourse._id));
+        }
+
         toast.success("Course updated successfully");
-        dispatch(updateCreatorCourse(response.data.course));
         navigate("/courses");
       } else {
         toast.error("Error updating course");
       }
     } catch (error) {
       console.error("Error updating course:", error);
-      toast.error("Error updating course");
+      // ✅ Improved: Better error message
+      toast.error(error.response?.data?.message || "Error updating course");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveCourse = async () => {
-  setLoading(true);
-  try {
-    const response = await axios.delete(
-      serverUrl + `/api/course/deleteCourse/${courseId}`,
-      {
-        withCredentials: true,
+  // ✅ New: Extracted publish toggle logic
+  const handlePublishToggle = async () => {
+    const newStatus = !isPublished;
+    
+    try {
+      // Optimistic update
+      setIsPublished(newStatus);
+
+      // ✅ Fixed: Added 's' to /api/courses/
+      const response = await axios.post(
+        serverUrl + `/api/courses/publishToggle/${selectCourse._id}`,
+        { isPublished: newStatus },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        const updatedCourse = response.data.course;
+        dispatch(updateCreatorCourse(updatedCourse));
+
+        if (updatedCourse.isPublished) {
+          dispatch(updateEducatorPublishedCourse(updatedCourse));
+          toast.success("Course published successfully!");
+        } else {
+          dispatch(removeEducatorPublishedCourse(updatedCourse._id));
+          toast.success("Course unpublished successfully!");
+        }
+      } else {
+        // Revert on failure
+        setIsPublished(!newStatus);
+        toast.error("Failed to update publish status");
       }
-    );
-    
-    // Remove the course from Redux store using the new action
-    dispatch(removeCreatorCourse(courseId));
-    
-    setLoading(false);
-    toast.success("Course removed successfully");
-    navigate("/courses");
-    console.log("Course removed successfully:", response.data);
-  } catch (error) {
-    setLoading(false);
-    toast.error("Error removing course. Please try again.");
-    console.error("Error removing course:", error);
-  }
-};
+    } catch (err) {
+      console.error("Error updating publish status:", err);
+      // Revert on error
+      setIsPublished(!newStatus);
+      toast.error(err.response?.data?.message || "Error updating publish status");
+    }
+  };
+
+  const handleRemoveCourse = async () => {
+    // ✅ New: Added confirmation dialog
+    if (!window.confirm("Are you sure you want to delete this course?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // ✅ Fixed: Added 's' to /api/courses/
+      const response = await axios.delete(
+        serverUrl + `/api/courses/deleteCourse/${courseId}`,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        // Remove from both arrays
+        dispatch(removeCreatorCourse(courseId));
+        dispatch(removeEducatorPublishedCourse(courseId));
+
+        toast.success("Course removed successfully");
+        navigate("/courses");
+        console.log("Course removed successfully:", response.data);
+      } else {
+        toast.error("Failed to remove course");
+      }
+    } catch (error) {
+      console.error("Error removing course:", error);
+      toast.error(error.response?.data?.message || "Error removing course");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (courseId) {
@@ -164,10 +238,20 @@ function EditCourse() {
     };
   }, [frontendImage]);
 
+  // ✅ Improved: Better loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        Loading...
+        <ClipLoader color="#3b82f6" size={50} />
+      </div>
+    );
+  }
+
+  // ✅ New: Course not found check
+  if (!selectCourse) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-500 text-lg">Course not found</p>
       </div>
     );
   }
@@ -178,7 +262,7 @@ function EditCourse() {
         {/* topbar */}
         <div className="flex items-center justify-center gap-[20px] md:justify-between flex-col md:flex-row mb-6 relative">
           <FaArrowLeftLong
-            className="top-[-20%] md:top-[20%] absolute left-[0] md:left-[2%] w-[22px] h-[22px] cursor-pointer text-gray-500"
+            className="top-[-20%] md:top-[20%] absolute left-[0] md:left-[2%] w-[22px] h-[22px] cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={() => navigate("/courses")}
           />
 
@@ -188,7 +272,8 @@ function EditCourse() {
         </div>
 
         <div className="space-x-2 space-y-2">
-          <button className="bg-black text-white px-4 py-2 rounded"
+          <button
+            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
             onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
           >
             Go to Lecture pages
@@ -202,40 +287,27 @@ function EditCourse() {
           </h2>
 
           <div className="flex gap-4 mt-3 mb-6">
-            {isPublished ? (
-              <button
-                className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg 
-                 hover:bg-gray-800 hover:shadow-xl 
-                 focus:ring-2 focus:ring-gray-500/50 
-                 active:scale-95 transition-all duration-200"
-                onClick={() => setIsPublished((prev) => !prev)}
-              >
-                Click to Unpublish
-              </button>
-            ) : (
-              <button
-                className="bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg 
-                 hover:bg-green-500 hover:shadow-xl 
-                 focus:ring-2 focus:ring-green-400/50 
-                 active:scale-95 transition-all duration-200"
-                onClick={() => setIsPublished((prev) => !prev)}
-              >
-                Click to Publish
-              </button>
-            )}
+            {/* ✅ Simplified: Now uses handlePublishToggle function */}
+            <button
+              className={`${
+                isPublished
+                  ? "bg-gray-900 hover:bg-gray-800"
+                  : "bg-green-600 hover:bg-green-500"
+              } text-white px-6 py-2.5 rounded-lg font-medium shadow-lg focus:ring-2 active:scale-95 transition-all duration-200`}
+              onClick={handlePublishToggle}
+            >
+              {isPublished ? "Click to Unpublish" : "Click to Publish"}
+            </button>
 
             <button
-              className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg 
-               hover:bg-red-500 hover:shadow-xl 
-               focus:ring-2 focus:ring-red-400/50 
-               active:scale-95 transition-all duration-200"
+              className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:bg-red-500 hover:shadow-xl focus:ring-2 focus:ring-red-400/50 active:scale-95 transition-all duration-200"
               onClick={handleRemoveCourse}
             >
               Remove Course
             </button>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
             <div>
               <label
                 htmlFor="title"
@@ -246,7 +318,7 @@ function EditCourse() {
               <input
                 type="text"
                 id="title"
-                className="border border-gray-300 p-2 rounded-lg w-full"
+                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter course title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -263,7 +335,7 @@ function EditCourse() {
               <input
                 type="text"
                 id="subtitle"
-                className="border border-gray-300 p-2 rounded-lg w-full"
+                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter course subtitle"
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
@@ -279,7 +351,7 @@ function EditCourse() {
               </label>
               <textarea
                 id="description"
-                className="border border-gray-300 p-2 rounded-lg w-full h-24"
+                className="border border-gray-300 p-2 rounded-lg w-full h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter course description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -298,7 +370,7 @@ function EditCourse() {
                 <select
                   name="category"
                   id="category"
-                  className="border border-gray-300 p-2 rounded-lg w-full"
+                  className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                 >
@@ -321,7 +393,7 @@ function EditCourse() {
                 <select
                   name="level"
                   id="level"
-                  className="border border-gray-300 p-2 rounded-lg w-full"
+                  className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={level}
                   onChange={(e) => setLevel(e.target.value)}
                 >
@@ -343,7 +415,7 @@ function EditCourse() {
                 <input
                   type="number"
                   id="price"
-                  className="border border-gray-300 p-2 rounded-lg w-full"
+                  className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter course price"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
@@ -392,7 +464,6 @@ function EditCourse() {
                           console.log("Image src:", frontendImage);
                         }}
                       />
-                      {/* Hover overlay - only show when hovering */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100">
                         <span className="text-white font-medium">
                           Click to change image
@@ -415,21 +486,25 @@ function EditCourse() {
             <div className="flex gap-4 mt-6 justify-end">
               <button
                 type="button"
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
                 onClick={handleSaveChanges}
+                disabled={loading}
               >
                 {loading ? (
-                  <ClipLoader color="#ffffff" size={24} />
+                  <>
+                    <ClipLoader color="#ffffff" size={20} />
+                    <span>Saving...</span>
+                  </>
                 ) : (
                   "Save Changes"
                 )}
               </button>
               <button
                 type="button"
-                className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
-                onClick={handleRemoveCourse}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                onClick={() => navigate("/courses")}
               >
-                Discard Changes
+                Cancel
               </button>
             </div>
           </form>

@@ -12,7 +12,7 @@ function CreateCourse() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const { userData } = useSelector((state) => state.user);
 
   const handleCreateCourse = async () => {
@@ -21,12 +21,11 @@ function CreateCourse() {
       toast.error("Please enter a course title");
       return;
     }
-    
+
     if (!category) {
       toast.error("Please select a category");
       return;
     }
-
 
     if (!userData) {
       toast.error("Please log in first");
@@ -35,35 +34,34 @@ function CreateCourse() {
     }
 
     setLoading(true);
-    
+
     try {
       console.log("Sending data:", { title, category });
       console.log("Server URL:", serverUrl);
       console.log("User data:", userData);
-      
+
       const result = await axios.post(
         serverUrl + "/api/course/create",
         { title, category },
         { withCredentials: true }
       );
-      
+
       console.log("Success response:", result.data);
       toast.success("Course created successfully!");
-      
+
       // Clear form
       setTitle("");
       setCategory("");
-      
+
       // Navigate to courses page
       navigate("/courses");
-      
     } catch (error) {
       console.error("Full error object:", error);
-      
+
       if (error.response) {
         console.error("Error response data:", error.response.data);
         console.error("Error status:", error.response.status);
-        
+
         if (error.response.status === 401) {
           toast.error("Please log in again");
           navigate("/login");
@@ -137,15 +135,19 @@ function CreateCourse() {
                 <option value="Other">Other</option>
               </select>
             </div>
-            
+
             <div className="flex justify-center">
-              <button 
+              <button
                 type="button"
                 className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition flex justify-center items-center min-w-[150px] disabled:opacity-50"
                 onClick={handleCreateCourse}
                 disabled={loading}
               >
-                {loading ? <ClipLoader size={20} color="white" /> : "Create Course"}
+                {loading ? (
+                  <ClipLoader size={20} color="white" />
+                ) : (
+                  "Create Course"
+                )}
               </button>
             </div>
           </form>

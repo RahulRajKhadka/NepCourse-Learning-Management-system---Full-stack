@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 import { serverUrl } from "../App.jsx";
 import { useDispatch } from "react-redux";
@@ -14,20 +12,19 @@ const useGetCurrentUser = () => {
       try {
         console.log("Fetching current user...");
         console.log("Server URL:", serverUrl);
-        
+
         const result = await axios.get(serverUrl + "/api/user/getcurrentuser", {
           withCredentials: true,
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         });
 
         console.log("User data fetched:", result.data);
-        
+
         // Handle both response formats
         const userData = result.data.user || result.data;
         dispatch(setUserData(userData));
-        
       } catch (error) {
         console.log("Error fetching user:", error);
 
@@ -38,7 +35,10 @@ const useGetCurrentUser = () => {
           console.log("User not found");
           dispatch(setUserData(null));
         } else {
-          console.error("Unexpected error:", error.response?.data || error.message);
+          console.error(
+            "Unexpected error:",
+            error.response?.data || error.message
+          );
           dispatch(setUserData(null));
         }
       }

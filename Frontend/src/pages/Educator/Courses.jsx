@@ -12,42 +12,29 @@ const Courses = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ✅ user data from redux
   const { userData } = useSelector((state) => state.user);
-
-  // ✅ only pick creatorCourses array from course slice
   const creatorCourses = useSelector((state) => state.course.creatorCourses);
-
-  // ✅ safety fallback so map() won’t crash
   const safeCourseData = creatorCourses || [];
 
-  console.log("Checkpoint 1 → Redux creatorCourses state:", creatorCourses);
-  console.log("Checkpoint 2 → safeCourseData (array):", safeCourseData);
-
-  // ✅ fetch creator courses
   useEffect(() => {
     const CreateCourses = async () => {
       try {
         const result = await axios.get(
-          serverUrl + "/api/course/getCreatorCourse",
+          serverUrl + "/api/courses/getCreatorCourse",
           {
             withCredentials: true,
           }
         );
-        console.log("Checkpoint 3 → Fetched creator courses from API:", result.data);
 
         const courses = result.data.courses || [];
         dispatch(setCreatorCourses(courses));
-        console.log("Checkpoint 4 → Updated creatorCourses in store:", courses);
       } catch (error) {
-        console.error("Checkpoint 5 → Error fetching creator courses:", error);
         dispatch(setCreatorCourses([]));
       }
     };
     CreateCourses();
   }, [userData, dispatch]);
 
-  // ✅ debug log whenever courses change
   useEffect(() => {
     if (Array.isArray(safeCourseData) && safeCourseData.length > 0) {
       console.log("Checkpoint 6 → All creator courses:", safeCourseData);
@@ -59,8 +46,6 @@ const Courses = () => {
           idLength: course._id?.length,
         });
       });
-    } else {
-      console.log("Checkpoint 7 → No creator courses available.");
     }
   }, [safeCourseData]);
 
@@ -68,7 +53,6 @@ const Courses = () => {
     <>
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="w-full min-h-screen p-4 sm:p-8">
-          {/* Header Section */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center gap-4">
               <button
@@ -95,7 +79,6 @@ const Courses = () => {
             </button>
           </div>
 
-          {/* Desktop Table View */}
           <div className="hidden md:block bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <div className="overflow-x-auto">
               <table className="min-w-full">
@@ -235,14 +218,12 @@ const Courses = () => {
             </div>
           </div>
 
-          {/* Mobile Card View */}
           <div className="md:hidden space-y-6">
             {safeCourseData.map((course, index) => (
               <div
                 key={course._id || index}
                 className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-200"
               >
-                {/* Course Thumbnail Header */}
                 <div className="relative h-48 w-full overflow-hidden">
                   <img
                     src={course.thumbnail || img}
@@ -337,6 +318,8 @@ const Courses = () => {
               </p>
             </div>
           </div>
+
+          
         </div>
       </div>
     </>

@@ -19,7 +19,7 @@ function CreateLecture() {
   const [fetchingLectures, setFetchingLectures] = useState(false);
   const dispatch = useDispatch();
   const { lectures } = useSelector((state) => state.lecture);
-  
+
   const handleCreateLecture = async () => {
     if (!lectureTitle.trim()) {
       toast.error("Lecture title cannot be empty");
@@ -29,7 +29,7 @@ function CreateLecture() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${serverUrl}/api/course/createlecture/${courseId}`,
+        `${serverUrl}/api/courses/createlecture/${courseId}`,
         { title: lectureTitle },
         { withCredentials: true }
       );
@@ -55,19 +55,22 @@ function CreateLecture() {
   useEffect(() => {
     const getCourseLectures = async () => {
       if (!courseId) return;
-      
+
       setFetchingLectures(true);
       try {
         console.log("Fetching lectures for courseId:", courseId);
-        console.log("Full URL:", `${serverUrl}/api/course/getCourseLectures/${courseId}`);
-        
+        console.log(
+          "Full URL:",
+          `${serverUrl}/api/courses/getCourseLectures/${courseId}`
+        );
+
         const response = await axios.get(
-          `${serverUrl}/api/course/getCourseLectures/${courseId}`,
+          `${serverUrl}/api/courses/getCourseLectures/${courseId}`,
           { withCredentials: true }
         );
-        
+
         console.log("Fetched lectures:", response.data);
-        
+
         // Set all lectures (replace the entire array)
         dispatch(setAllLectures(response.data.lectures || []));
       } catch (error) {
@@ -76,9 +79,13 @@ function CreateLecture() {
           message: error.message,
           status: error.response?.status,
           statusText: error.response?.statusText,
-          data: error.response?.data
+          data: error.response?.data,
         });
-        toast.error(`Failed to fetch lectures: ${error.response?.status || 'Network Error'}`);
+        toast.error(
+          `Failed to fetch lectures: ${
+            error.response?.status || "Network Error"
+          }`
+        );
       } finally {
         setFetchingLectures(false);
       }

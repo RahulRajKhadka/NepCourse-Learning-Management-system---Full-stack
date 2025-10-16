@@ -1,82 +1,64 @@
+// redux/courseSlice.jsx
 import { createSlice } from "@reduxjs/toolkit";
 
 const courseSlice = createSlice({
   name: "course",
-  
   initialState: {
-
     creatorCourses: [],
+    educatorPublishedCourses: [],
     publishedCourses: [],
-    selectedCourse:null,
+    selectedCourse: null,
+    loading: false,
   },
   reducers: {
-    
-  
     setCreatorCourses: (state, action) => {
-      console.log("Setting creator courses:", action.payload);
       state.creatorCourses = action.payload;
+      state.educatorPublishedCourses = action.payload.filter(
+        (course) => course.isPublished
+      );
+    },
+
+    setEducatorPublishedCourses: (state, action) => {
+      state.educatorPublishedCourses = action.payload;
     },
 
     setPublishedCourses: (state, action) => {
-      console.log("Setting published courses:", action.payload);
       state.publishedCourses = action.payload;
     },
 
-    clearCourseData: (state) => {
-      state.courseData = [];
-    },
-
-    clearCreatorCourses: (state) => {
-      state.creatorCourses = [];
-    },
-
-    clearPublishedCourses: (state) => {
-      state.publishedCourses = [];
-    },
-
-    clearAllCourses: (state) => {
-      state.courseData = [];
-      state.creatorCourses = [];
-      state.publishedCourses = [];
-    },
-
-    // Add course to creator courses
-    addCreatorCourse: (state, action) => {
-      state.creatorCourses.push(action.payload);
-    },
-
-    addPublishedCourse: (state, action) => {
-      state.publishedCourses.push(action.payload);
-    },
-
-    addCourse: (state, action) => {
-      state.courseData.push(action.payload);
-    },
-
     updateCreatorCourse: (state, action) => {
+      const updatedCourse = action.payload;
+
       const index = state.creatorCourses.findIndex(
-        (course) => course._id === action.payload._id
+        (course) => course._id === updatedCourse._id
       );
       if (index !== -1) {
-        state.creatorCourses[index] = action.payload;
+        state.creatorCourses[index] = updatedCourse;
       }
-    },
 
-    updatePublishedCourse: (state, action) => {
-      const index = state.publishedCourses.findIndex(
-        (course) => course._id === action.payload._id
+      const pubIndex = state.educatorPublishedCourses.findIndex(
+        (course) => course._id === updatedCourse._id
       );
-      if (index !== -1) {
-        state.publishedCourses[index] = action.payload;
+
+      if (updatedCourse.isPublished) {
+        if (pubIndex !== -1) {
+          state.educatorPublishedCourses[pubIndex] = updatedCourse;
+        } else {
+          state.educatorPublishedCourses.push(updatedCourse);
+        }
+      } else {
+        if (pubIndex !== -1) {
+          state.educatorPublishedCourses.splice(pubIndex, 1);
+        }
       }
-    },
 
-    updateCourse: (state, action) => {
-      const index = state.courseData.findIndex(
-        (course) => course._id === action.payload._id
+      const globalIndex = state.publishedCourses.findIndex(
+        (course) => course._id === updatedCourse._id
       );
-      if (index !== -1) {
-        state.courseData[index] = action.payload;
+      if (globalIndex !== -1 && updatedCourse.isPublished) {
+        state.publishedCourses[globalIndex] = updatedCourse;
+      } else if (globalIndex !== -1 && !updatedCourse.isPublished) {
+        state.publishedCourses.splice(globalIndex, 1);
       }
     },
 
@@ -84,44 +66,64 @@ const courseSlice = createSlice({
       state.creatorCourses = state.creatorCourses.filter(
         (course) => course._id !== action.payload
       );
-    },
-
-    removePublishedCourse: (state, action) => {
+      state.educatorPublishedCourses = state.educatorPublishedCourses.filter(
+        (course) => course._id !== action.payload
+      );
       state.publishedCourses = state.publishedCourses.filter(
         (course) => course._id !== action.payload
       );
     },
 
-    removeCourse: (state, action) => {
-      state.courseData = state.courseData.filter(
+    addEducatorPublishedCourse: (state, action) => {
+      const course = action.payload;
+      const exists = state.educatorPublishedCourses.some(
+        (c) => c._id === course._id
+      );
+      if (!exists) {
+        state.educatorPublishedCourses.push(course);
+      }
+    },
+
+    updateEducatorPublishedCourse: (state, action) => {
+      const updatedCourse = action.payload;
+      const index = state.educatorPublishedCourses.findIndex(
+        (course) => course._id === updatedCourse._id
+      );
+
+      if (index !== -1) {
+        state.educatorPublishedCourses[index] = updatedCourse;
+      } else {
+        state.educatorPublishedCourses.push(updatedCourse);
+      }
+    },
+
+    removeEducatorPublishedCourse: (state, action) => {
+      state.educatorPublishedCourses = state.educatorPublishedCourses.filter(
         (course) => course._id !== action.payload
       );
     },
 
-    setSelectedCourse:(state,action)=>{
-      state.selectedCourse=action.payload
-    }
+    setSelectedCourse: (state, action) => {
+      state.selectedCourse = action.payload;
+    },
+
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
   },
 });
 
 export const {
-
-
   setCreatorCourses,
-  clearCreatorCourses,
-  addCreatorCourse,
+  setEducatorPublishedCourses,
+  setPublishedCourses,
   updateCreatorCourse,
   removeCreatorCourse,
-
-  setPublishedCourses,
-  clearPublishedCourses,
-  addPublishedCourse,
-  updatePublishedCourse,
-  removePublishedCourse,
-
-  clearAllCourses,
-
-  setSelectedCourse
+  addEducatorPublishedCourse,
+  updateEducatorPublishedCourse,
+  removeEducatorPublishedCourse,
+  setSelectedCourse,
+  setLoading,
 } = courseSlice.actions;
 
 export default courseSlice.reducer;

@@ -17,23 +17,7 @@ function Nav() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("=== NAV COMPONENT DEBUG ===");
-    console.log("userData:", userData);
-    console.log("userData type:", typeof userData);
-    console.log("userData is null:", userData === null);
-    console.log("userData is undefined:", userData === undefined);
-    console.log("userData keys:", userData ? Object.keys(userData) : "No keys");
-    console.log(
-      "userData length:",
-      userData && typeof userData === "object"
-        ? Object.keys(userData).length
-        : "Not an object"
-    );
-    console.log(
-      "Is user logged in?",
-      !!(userData && Object.keys(userData).length > 0)
-    );
-    console.log("==========================");
+    console.log("User Data Updated:", userData);
   }, [userData]);
 
   const handleLogout = async () => {
@@ -157,10 +141,10 @@ function Nav() {
                     Browse Courses
                   </button>
 
-                  {(userData?.role === "educator" || userData?.role === "teacher") && (
+                  {userData && (
                     <button
                       className="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-                      onClick={() => handleNavigation("/courses")}
+                      onClick={() => handleNavigation("/my-enrolled-courses")}
                     >
                       My Courses
                     </button>
@@ -244,10 +228,10 @@ function Nav() {
               <button
                 className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
                 onClick={() => handleNavigation("/allcourses")}
-              >
-              </button>
+              ></button>
 
-              {(userData?.role === "educator" || userData?.role === "teacher") && (
+              {(userData?.role === "educator" ||
+                userData?.role === "teacher") && (
                 <button
                   className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
                   onClick={() => handleNavigation("/courses")}

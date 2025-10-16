@@ -12,7 +12,7 @@ const GetCreatorCourses = () => {
     const CreateCourses = async () => {
       try {
         const result = await axios.get(
-          serverUrl + "/api/course/getCreatorCourse",
+          serverUrl + "/api/courses/getCreatorCourse",
           {
             withCredentials: true,
           }

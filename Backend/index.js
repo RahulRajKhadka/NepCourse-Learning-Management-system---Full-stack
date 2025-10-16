@@ -8,6 +8,7 @@ import cors from "cors";
 import userRouter from "./Routes/userRoute.js";
 import paymentRouter from "./Routes/paymentRoutes.js";
 import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
+import reviewRouter from './Routes/reviewRoute.js';
 
 
 dotenv.config();
@@ -28,9 +29,10 @@ app.use(
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
-app.use("/api/course", courseRouter);
+app.use("/api/courses", courseRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/enrollment", enrollmentRoutes);
+app.use('/api/review', reviewRouter);
 
 
 app.get("/", (req, res) => {

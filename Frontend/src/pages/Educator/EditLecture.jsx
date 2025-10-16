@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { setAllLectures, removeLecture } from "../../redux/LectureSlice";
 
-
 function EditLecture() {
   const { courseId, lectureId } = useParams();
   const navigate = useNavigate();
@@ -57,12 +56,12 @@ function EditLecture() {
       if (!lectures.length && courseId) {
         try {
           const response = await axios.get(
-            `${serverUrl}/api/course/getCourseLectures/${courseId}`,
+            `${serverUrl}/api/courses/getCourseLectures/${courseId}`,
             { withCredentials: true }
           );
           dispatch(setAllLectures(response.data.lectures || []));
         } catch (error) {
-          toast.error("Failed to fetch lecture data",error);
+          toast.error("Failed to fetch lecture data", error);
         }
       }
     };
@@ -116,7 +115,7 @@ function EditLecture() {
         formData.append("video", videoFile);
       }
 
-      const url = `${serverUrl}/api/course/editlecture/${courseId}/${lectureId}`;
+      const url = `${serverUrl}/api/courses/editlecture/${courseId}/${lectureId}`;
 
       await axios.post(url, formData, {
         withCredentials: true,
@@ -126,14 +125,13 @@ function EditLecture() {
       });
 
       const lecturesResponse = await axios.get(
-        `${serverUrl}/api/course/getCourseLectures/${courseId}`,
+        `${serverUrl}/api/courses/getCourseLectures/${courseId}`,
         { withCredentials: true }
       );
       dispatch(setAllLectures(lecturesResponse.data.lectures || []));
 
       toast.success("Lecture updated successfully");
-navigate("/courses"); 
-
+      navigate("/courses");
     } catch (error) {
       toast.error(
         "Error updating lecture: " +
@@ -157,7 +155,7 @@ navigate("/courses");
 
     try {
       await axios.delete(
-        `${serverUrl}/api/course/deleteLecture/${courseId}/${lectureId}`,
+        `${serverUrl}/api/courses/deleteLecture/${courseId}/${lectureId}`,
         { withCredentials: true }
       );
 
@@ -183,8 +181,7 @@ navigate("/courses");
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () =>
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   if (!selectedLecture && lectures.length === 0) {
@@ -447,9 +444,7 @@ navigate("/courses");
                       Created
                     </p>
                     <p className="text-sm text-gray-800">
-                      {new Date(
-                        selectedLecture.createdAt
-                      ).toLocaleDateString()}
+                      {new Date(selectedLecture.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

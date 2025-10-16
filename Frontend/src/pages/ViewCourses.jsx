@@ -7,7 +7,6 @@ import {
   FaUsers,
   FaGraduationCap,
   FaTag,
- 
 } from "react-icons/fa6";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,6 +17,7 @@ import { serverUrl } from "../App";
 import axios from "axios";
 import Card from "../Component/Card.jsx";
 import useScrollToTop from "../Component/UseScrollTop.jsx";
+import ReviewsSection from "./ReviewsSection..jsx";
 
 function ViewCourses() {
   const navigate = useNavigate();
@@ -28,70 +28,44 @@ function ViewCourses() {
   const [selectedLecture, setSelectedLecture] = useState(null);
   const [creatorData, setCreatorData] = useState(null);
   const [creatorCourse, setCreatorCourse] = useState([]);
-
-  // ✅ NEW: Enrollment state
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState(null);
   const [checkingEnrollment, setCheckingEnrollment] = useState(true);
 
   useScrollToTop(courseId);
 
-
-  
-
-  
-const checkEnrollmentStatus = useCallback(async () => {
-  try {
-    console.log("📡 Checking enrollment status for course:", courseId);
-    setCheckingEnrollment(true);
-    
-    const response = await axios.get(
-      `${serverUrl}/api/enrollment/check/${courseId}`,
-      { withCredentials: true }
-    );
-
-    console.log("📥 Enrollment Check Response:", response.data); // ✅ ADD THIS LOG
-
-    if (response.data.success) {
-      setIsEnrolled(response.data.isEnrolled);
-      setEnrollmentData(response.data.enrollment);
-      
-      console.log(response.data.isEnrolled  // ✅ ADD THIS LOG
-        ? "✅ User IS enrolled - Button should show 'Watch Course'" 
-        : "❌ User NOT enrolled - Button should show 'Enroll Now'");
+  const checkEnrollmentStatus = useCallback(async () => {
+    try {
+      setCheckingEnrollment(true);
+      const response = await axios.get(
+        `${serverUrl}/api/enrollment/check/${courseId}`,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setIsEnrolled(response.data.isEnrolled);
+        setEnrollmentData(response.data.enrollment);
+      }
+    } catch {
+      setIsEnrolled(false);
+    } finally {
+      setCheckingEnrollment(false);
     }
-  } catch (error) {
-    console.log("Error checking enrollment:", error);
-    setIsEnrolled(false);
-  } finally {
-    setCheckingEnrollment(false);
-  }
-}, [courseId]);
-
+  }, [courseId]);
 
   useEffect(() => {
     checkEnrollmentStatus();
   }, [checkEnrollmentStatus]);
 
-  
-useEffect(() => {
-  // Check if returning from payment success via URL parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  const fromPayment = urlParams.get('from_payment');
-  
-  if (fromPayment === 'success') {
-    console.log("🔄 User returned from payment - Force refreshing enrollment status...");
-    
-    // Force re-check enrollment after payment
-    setTimeout(() => {
-      checkEnrollmentStatus();
-    }, 500); // Small delay to ensure backend has processed
-    
-    // Clean up URL to remove query parameter
-    window.history.replaceState({}, '', `/view-course/${courseId}`);
-  }
-}, [courseId, checkEnrollmentStatus]);
-
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromPayment = urlParams.get("from_payment");
+    if (fromPayment === "success") {
+      setTimeout(() => {
+        checkEnrollmentStatus();
+      }, 500);
+      window.history.replaceState({}, "", `/view-course/${courseId}`);
+    }
+  }, [courseId, checkEnrollmentStatus]);
 
   const fetchCourseData = useCallback(() => {
     const foundCourse = creatorCourses.find(
@@ -117,17 +91,14 @@ useEffect(() => {
       if (selectedCourse?.creator) {
         try {
           const result = await axios.post(
-            serverUrl + "/api/course/creator",
+            serverUrl + "/api/courses/creator",
             { userId: selectedCourse?.creator },
             { withCredentials: true }
           );
-
           if (result.data.success) {
             setCreatorData(result.data.creator);
           }
-        } catch (error) {
-          console.log("Error fetching creator:", error);
-        }
+        } catch {}
       }
     };
     handleCreator();
@@ -149,24 +120,20 @@ useEffect(() => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-
     for (let i = 0; i < fullStars; i++) {
       stars.push(<FaStar key={i} className="text-yellow-400 w-4 h-4" />);
     }
-
     if (hasHalfStar) {
       stars.push(
         <FaStarHalfAlt key="half" className="text-yellow-400 w-4 h-4" />
       );
     }
-
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
       stars.push(
         <FaRegStar key={`empty-${i}`} className="text-gray-300 w-4 h-4" />
       );
     }
-
     return stars;
   };
 
@@ -184,13 +151,10 @@ useEffect(() => {
   };
 
   const handleEnrollOrWatch = async () => {
-    
     if (isEnrolled) {
-      navigate(`/course/${courseId}`);
+      navigate(`/viewlecture/${courseId}`);
       return;
     }
-
-    
     if (selectedCourse?.price === 0 || selectedCourse?.price === null) {
       try {
         const response = await axios.post(
@@ -198,34 +162,17 @@ useEffect(() => {
           { courseId },
           { withCredentials: true }
         );
-
-        console.log("Free enrollment response:", response.data);
-
         if (response.data.success) {
-          if (response.data.alreadyEnrolled) {
-            setIsEnrolled(true);
-            setEnrollmentData(response.data.enrollment);
-            navigate(`/course/${courseId}`);
-          } else {
-            alert("✅ Enrolled successfully (Free Course)");
-            setIsEnrolled(true);
-            setEnrollmentData(response.data.enrollment);
-            navigate(`/course/${courseId}`);
-          }
-        } else {
-          alert("❌ Enrollment failed, please try again");
+          setIsEnrolled(true);
+          setEnrollmentData(response.data.enrollment);
+          setTimeout(() => navigate(`/viewlecture/${courseId}`), 800);
         }
       } catch (error) {
-        console.error("Free enrollment error:", error);
         if (error.response?.status === 401) {
-          alert("Please login to enroll in this course");
           navigate("/login");
-        } else {
-          alert("Something went wrong, please try again");
         }
       }
     } else {
-     
       navigate(`/payment/${courseId}`, {
         state: {
           course: {
@@ -239,7 +186,6 @@ useEffect(() => {
     }
   };
 
-  
   const getButtonConfig = () => {
     if (checkingEnrollment) {
       return {
@@ -249,7 +195,6 @@ useEffect(() => {
         className: "bg-gray-400 cursor-not-allowed",
       };
     }
-
     if (isEnrolled) {
       return {
         text: "Watch Course",
@@ -258,7 +203,6 @@ useEffect(() => {
         className: "bg-green-600 hover:bg-green-700",
       };
     }
-
     if (selectedCourse?.price === 0 || selectedCourse?.price === null) {
       return {
         text: "Enroll Free",
@@ -267,7 +211,6 @@ useEffect(() => {
         className: "bg-blue-600 hover:bg-blue-700",
       };
     }
-
     return {
       text: `Enroll Now - $${selectedCourse?.price}`,
       icon: <FaLock />,
@@ -280,7 +223,6 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Hero Section */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
@@ -292,7 +234,6 @@ useEffect(() => {
           </button>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Course Image */}
             <div className="lg:col-span-1">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
                 <img
@@ -300,19 +241,14 @@ useEffect(() => {
                   alt={selectedCourse?.title || "Course Thumbnail"}
                   className="w-full h-64 sm:h-80 lg:h-96 object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
-
-             
                 {isEnrolled && (
                   <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
-                  
                     Enrolled
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Course Info */}
             <div className="lg:col-span-2 space-y-6">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
@@ -326,8 +262,6 @@ useEffect(() => {
                   <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
                     {capitalizeWords(selectedCourse?.category) || "General"}
                   </span>
-
-                  {/* ✅ NEW: Progress Badge for enrolled users */}
                   {isEnrolled && enrollmentData && (
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
                       Progress: {enrollmentData.progress}%
@@ -344,7 +278,6 @@ useEffect(() => {
                     "No description available for this course."}
                 </p>
 
-                {/* Rating */}
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">{renderStars()}</div>
                   <span className="text-sm font-medium text-gray-700">
@@ -352,7 +285,6 @@ useEffect(() => {
                   </span>
                 </div>
 
-                {/* Course Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="flex items-center gap-2 text-gray-600">
                     <FaClock className="w-4 h-4 text-blue-500" />
@@ -380,7 +312,6 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* ✅ UPDATED: Enroll/Watch Button */}
                 <div className="pt-4">
                   <button
                     onClick={handleEnrollOrWatch}
@@ -397,10 +328,8 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Curriculum Sidebar */}
           <div className="lg:col-span-1 order-2 lg:order-1">
             <div className="sticky top-8 bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -469,7 +398,6 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Video Player */}
           <div className="lg:col-span-2 order-1 lg:order-2">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="aspect-video w-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
@@ -513,7 +441,8 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Instructor Section */}
+        <ReviewsSection courseId={courseId} isEnrolled={isEnrolled} />
+
         <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div className="p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -548,7 +477,6 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Other Courses */}
         {creatorCourse?.length > 0 && (
           <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="p-8">
