@@ -83,7 +83,6 @@ export const Login = () => {
       console.log("userData type:", typeof userData);
       console.log("userData keys:", userData ? Object.keys(userData) : 'null/undefined');
 
-      // Dispatch to Redux
       dispatch(setUserData(userData));
 
       // Verify it was stored
@@ -99,7 +98,7 @@ export const Login = () => {
 
       toast.success("Login successful!");
       
-      // Navigate to home
+     
       navigate("/");
 
     } catch (error) {
@@ -247,7 +246,7 @@ export const Login = () => {
             )}
           </button>
 
-          {/* Rest of your form elements... */}
+         
           <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm underline mt-2">
             Forgot Password?
           </Link>
@@ -275,7 +274,7 @@ export const Login = () => {
           </div>
         </div>
 
-        {/* Right side - Banner */}
+    
         <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 rounded-r-2xl flex-col items-center justify-center gap-6 p-8">
           <img src={logo} alt="NEP Courses Logo" className="w-4/5 max-w-xs rounded-2xl shadow-2xl" />
           <h1 className="text-2xl font-bold text-white text-center">WELCOME TO NEPCOURSES</h1>

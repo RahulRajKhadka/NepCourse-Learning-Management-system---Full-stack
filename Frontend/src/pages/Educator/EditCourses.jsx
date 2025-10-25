@@ -1,4 +1,4 @@
-import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
 import img from "../../assets/empty.jpg";
@@ -31,6 +31,51 @@ function EditCourse() {
   const [backendImage, setBackendImage] = useState(null);
   const [subtitle, setSubtitle] = useState("");
   const [loading, setLoading] = useState(true);
+  const [customCategory, setCustomCategory] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const [categories, setCategories] = useState([
+    "App development",
+    "Web development",
+    "Data Science",
+    "AI/ML",
+    "DevOps",
+    "Cloud Computing",
+    "UI/UX Design",
+    "Cyber Security",
+    "Digital Marketing",
+    "Game Development",
+    "Blockchain",
+    "Internet of Things",
+    "Software Testing",
+    "Mobile Development",
+    "Database Management",
+  ]);
+
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+    if (value === "custom") {
+      setShowCustomInput(true);
+      setCategory("");
+    } else {
+      setCategory(value);
+      setShowCustomInput(false);
+    }
+  };
+
+  const handleAddCustomCategory = () => {
+    if (customCategory.trim() && !categories.includes(customCategory.trim())) {
+      setCategories((prev) => [...prev, customCategory.trim()]);
+      setCategory(customCategory.trim());
+      setCustomCategory("");
+      setShowCustomInput(false);
+    }
+  };
+
+  const handleCancelCustom = () => {
+    setShowCustomInput(false);
+    setCustomCategory("");
+  };
 
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
@@ -61,7 +106,7 @@ function EditCourse() {
   const getCourseById = async () => {
     try {
       setLoading(true);
-      // ✅ Fixed: Added 's' to /api/courses/
+
       const response = await axios.get(
         serverUrl + `/api/courses/getCourseById/${courseId}`,
         { withCredentials: true }
@@ -74,7 +119,6 @@ function EditCourse() {
       if (success && course) {
         setSelectCourse(course);
         setTitle(course.title || "");
-        // ✅ Fixed: Changed to course.subTitle (camelCase)
         setSubtitle(course.subTitle || "");
         setDescription(course.description || "");
         setCategory(course.category || "");
@@ -102,7 +146,6 @@ function EditCourse() {
     try {
       const formData = new FormData();
       formData.append("title", title);
-      // ✅ Fixed: Changed to "subTitle" (camelCase)
       formData.append("subTitle", subtitle);
       formData.append("description", description);
       formData.append("category", category);
@@ -113,25 +156,22 @@ function EditCourse() {
         formData.append("thumbnail", backendImage);
       }
 
-      // ✅ Fixed: Changed POST to PUT and added 's' to /api/courses/
       const response = await axios.put(
         serverUrl + `/api/courses/editcourse/${courseId}`,
         formData,
-        { 
+        {
           withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
-          }
+          },
         }
       );
 
       if (response.data.success) {
         const updatedCourse = response.data.course;
 
-        // Update creator courses
         dispatch(updateCreatorCourse(updatedCourse));
 
-        // Handle published/unpublished courses
         if (updatedCourse.isPublished) {
           dispatch(updateEducatorPublishedCourse(updatedCourse));
         } else {
@@ -145,22 +185,18 @@ function EditCourse() {
       }
     } catch (error) {
       console.error("Error updating course:", error);
-      // ✅ Improved: Better error message
       toast.error(error.response?.data?.message || "Error updating course");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ New: Extracted publish toggle logic
   const handlePublishToggle = async () => {
     const newStatus = !isPublished;
-    
+
     try {
-      // Optimistic update
       setIsPublished(newStatus);
 
-      // ✅ Fixed: Added 's' to /api/courses/
       const response = await axios.post(
         serverUrl + `/api/courses/publishToggle/${selectCourse._id}`,
         { isPublished: newStatus },
@@ -179,34 +215,31 @@ function EditCourse() {
           toast.success("Course unpublished successfully!");
         }
       } else {
-        // Revert on failure
         setIsPublished(!newStatus);
         toast.error("Failed to update publish status");
       }
     } catch (err) {
       console.error("Error updating publish status:", err);
-      // Revert on error
       setIsPublished(!newStatus);
-      toast.error(err.response?.data?.message || "Error updating publish status");
+      toast.error(
+        err.response?.data?.message || "Error updating publish status"
+      );
     }
   };
 
   const handleRemoveCourse = async () => {
-    // ✅ New: Added confirmation dialog
     if (!window.confirm("Are you sure you want to delete this course?")) {
       return;
     }
 
     setLoading(true);
     try {
-      // ✅ Fixed: Added 's' to /api/courses/
       const response = await axios.delete(
         serverUrl + `/api/courses/deleteCourse/${courseId}`,
         { withCredentials: true }
       );
 
       if (response.data.success) {
-        // Remove from both arrays
         dispatch(removeCreatorCourse(courseId));
         dispatch(removeEducatorPublishedCourse(courseId));
 
@@ -238,7 +271,6 @@ function EditCourse() {
     };
   }, [frontendImage]);
 
-  // ✅ Improved: Better loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -247,7 +279,6 @@ function EditCourse() {
     );
   }
 
-  // ✅ New: Course not found check
   if (!selectCourse) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -257,260 +288,285 @@ function EditCourse() {
   }
 
   return (
-    <>
-      <div className="max-w-5xl mx-auto p-6 mt-10 bg-white rounded-lg shadow-md">
-        {/* topbar */}
-        <div className="flex items-center justify-center gap-[20px] md:justify-between flex-col md:flex-row mb-6 relative">
-          <FaArrowLeftLong
-            className="top-[-20%] md:top-[20%] absolute left-[0] md:left-[2%] w-[22px] h-[22px] cursor-pointer text-gray-500 hover:text-gray-700"
-            onClick={() => navigate("/courses")}
-          />
+    <div className="max-w-5xl mx-auto p-6 mt-10 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-center gap-[20px] md:justify-between flex-col md:flex-row mb-6 relative">
+        <FaArrowLeftLong
+          className="top-[-20%] md:top-[20%] absolute left-[0] md:left-[2%] w-[22px] h-[22px] cursor-pointer text-gray-500 hover:text-gray-700"
+          onClick={() => navigate("/courses")}
+        />
 
-          <h2 className="text-lg font-medium md:pl-[60px]">
-            Edit Course Information
-          </h2>
-        </div>
+        <h2 className="text-lg font-medium md:pl-[60px]">
+          Edit Course Information
+        </h2>
+      </div>
 
-        <div className="space-x-2 space-y-2">
+      <div className="space-x-2 space-y-2">
+        <button
+          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
+          onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
+        >
+          Go to Lecture pages
+        </button>
+      </div>
+
+      <div className="bg-gray-50 p-6 rounded-lg shadow-md mt-6">
+        <h2 className="text-xl font-semibold mb-4">Basic Course Information</h2>
+
+        <div className="flex gap-4 mt-3 mb-6">
           <button
-            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
-            onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
+            className={`${
+              isPublished
+                ? "bg-gray-900 hover:bg-gray-800"
+                : "bg-green-600 hover:bg-green-500"
+            } text-white px-6 py-2.5 rounded-lg font-medium shadow-lg focus:ring-2 active:scale-95 transition-all duration-200`}
+            onClick={handlePublishToggle}
           >
-            Go to Lecture pages
+            {isPublished ? "Click to Unpublish" : "Click to Publish"}
+          </button>
+
+          <button
+            className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:bg-red-500 hover:shadow-xl focus:ring-2 focus:ring-red-400/50 active:scale-95 transition-all duration-200"
+            onClick={handleRemoveCourse}
+          >
+            Remove Course
           </button>
         </div>
 
-        {/* form-details */}
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md mt-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Basic Course Information
-          </h2>
-
-          <div className="flex gap-4 mt-3 mb-6">
-            {/* ✅ Simplified: Now uses handlePublishToggle function */}
-            <button
-              className={`${
-                isPublished
-                  ? "bg-gray-900 hover:bg-gray-800"
-                  : "bg-green-600 hover:bg-green-500"
-              } text-white px-6 py-2.5 rounded-lg font-medium shadow-lg focus:ring-2 active:scale-95 transition-all duration-200`}
-              onClick={handlePublishToggle}
+        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              {isPublished ? "Click to Unpublish" : "Click to Publish"}
-            </button>
-
-            <button
-              className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:bg-red-500 hover:shadow-xl focus:ring-2 focus:ring-red-400/50 active:scale-95 transition-all duration-200"
-              onClick={handleRemoveCourse}
-            >
-              Remove Course
-            </button>
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter course title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div>
+          <div>
+            <label
+              htmlFor="subtitle"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Subtitle
+            </label>
+            <input
+              type="text"
+              id="subtitle"
+              className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter course subtitle"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              className="border border-gray-300 p-2 rounded-lg w-full h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter course description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Enhanced Category Section */}
+            <div className="space-y-2">
               <label
-                htmlFor="title"
+                htmlFor="category"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Title
+                Course Category
               </label>
-              <input
-                type="text"
-                id="title"
-                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter course title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
 
-            <div>
-              <label
-                htmlFor="subtitle"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Subtitle
-              </label>
-              <input
-                type="text"
-                id="subtitle"
-                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter course subtitle"
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                className="border border-gray-300 p-2 rounded-lg w-full h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter course description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Category */}
-              <div>
-                <label
-                  htmlFor="category"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Course Category
-                </label>
+              {!showCustomInput ? (
                 <select
                   name="category"
                   id="category"
                   className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={handleCategoryChange}
                 >
                   <option value="">Select category</option>
-                  <option value="App development">App development</option>
-                  <option value="Web development">Web development</option>
-                  <option value="Data Science">Data Science</option>
-                  <option value="AI/ML">AI/ML</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="custom">+ Add custom category</option>
                 </select>
-              </div>
-
-              {/* Level */}
-              <div>
-                <label
-                  htmlFor="level"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Course Level
-                </label>
-                <select
-                  name="level"
-                  id="level"
-                  className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                >
-                  <option value="">Select level</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                </select>
-              </div>
-
-              {/* Price */}
-              <div>
-                <label
-                  htmlFor="price"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Price
-                </label>
-                <input
-                  type="number"
-                  id="price"
-                  className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter course price"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Thumbnail Section */}
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="thumbnail"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Course Thumbnail
-                </label>
-                <input
-                  type="file"
-                  id="thumbnail"
-                  className="border border-gray-400 p-2 rounded-lg w-full"
-                  ref={thumb}
-                  accept="image/*"
-                  onChange={handleThumbnailChange}
-                />
-              </div>
-
-              <div className="flex justify-center">
-                <div
-                  className="relative w-[300px] h-[170px] border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:border-gray-600 transition-colors bg-white"
-                  onClick={() => thumb.current?.click()}
-                >
-                  {frontendImage ? (
-                    <>
-                      <img
-                        src={frontendImage}
-                        alt="Course Thumbnail Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                        style={{
-                          display: "block",
-                          maxWidth: "100%",
-                          maxHeight: "100%",
-                        }}
-                        onLoad={() => console.log("Image loaded successfully")}
-                        onError={(e) => {
-                          console.error("Image failed to load:", e);
-                          console.log("Image src:", frontendImage);
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100">
-                        <span className="text-white font-medium">
-                          Click to change image
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">📷</div>
-                        <div>No image selected</div>
-                        <div className="text-sm">Click to upload</div>
-                      </div>
-                    </div>
-                  )}
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Enter your custom category"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddCustomCategory}
+                      disabled={!customCategory.trim()}
+                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Add
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelCustom}
+                      className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex gap-4 mt-6 justify-end">
-              <button
-                type="button"
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
-                onClick={handleSaveChanges}
-                disabled={loading}
+            {/* Level */}
+            <div>
+              <label
+                htmlFor="level"
+                className="block text-sm font-medium text-gray-700 mb-1"
               >
-                {loading ? (
+                Course Level
+              </label>
+              <select
+                name="level"
+                id="level"
+                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={level}
+                onChange={(e) => setLevel(e.target.value)}
+              >
+                <option value="">Select level</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+
+            {/* Price */}
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                id="price"
+                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter course price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Thumbnail Section */}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="thumbnail"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Course Thumbnail
+              </label>
+              <input
+                type="file"
+                id="thumbnail"
+                className="border border-gray-400 p-2 rounded-lg w-full"
+                ref={thumb}
+                accept="image/*"
+                onChange={handleThumbnailChange}
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <div
+                className="relative w-[300px] h-[170px] border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:border-gray-600 transition-colors bg-white"
+                onClick={() => thumb.current?.click()}
+              >
+                {frontendImage ? (
                   <>
-                    <ClipLoader color="#ffffff" size={20} />
-                    <span>Saving...</span>
+                    <img
+                      src={frontendImage}
+                      alt="Course Thumbnail Preview"
+                      className="w-full h-full object-cover rounded-lg"
+                      style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                      }}
+                      onLoad={() => console.log("Image loaded successfully")}
+                      onError={(e) => {
+                        console.error("Image failed to load:", e);
+                        console.log("Image src:", frontendImage);
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100">
+                      <span className="text-white font-medium">
+                        Click to change image
+                      </span>
+                    </div>
                   </>
                 ) : (
-                  "Save Changes"
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">📷</div>
+                      <div>No image selected</div>
+                      <div className="text-sm">Click to upload</div>
+                    </div>
+                  </div>
                 )}
-              </button>
-              <button
-                type="button"
-                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => navigate("/courses")}
-              >
-                Cancel
-              </button>
+              </div>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div className="flex gap-4 mt-6 justify-end">
+            <button
+              type="button"
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
+              onClick={handleSaveChanges}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <ClipLoader color="#ffffff" size={20} />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </button>
+            <button
+              type="button"
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              onClick={() => navigate("/courses")}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 

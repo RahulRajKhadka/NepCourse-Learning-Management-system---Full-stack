@@ -1,6 +1,7 @@
 import express from "express";
 import isAuth from "../middleware/isAuth.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
+import { searchWithAi } from "../Controller/searchController.js";
 import {
   createCourse,
   getCourseById,
@@ -15,6 +16,7 @@ import {
   getCreatorById,
   publishToggle,
   getEducatorPublishedCourses,
+
 } from "../Controller/courseController.js";
 import upload from "../middleware/Multer.js";
 
@@ -42,4 +44,8 @@ courseRouter.delete("/deleteLecture/:courseId/:lectureId", isAuth, removeLecture
 
 courseRouter.post("/creator", getCreatorById);
 
+
+///======================== for SEARCH ========================
+
+courseRouter.post("/searchWithAi", searchWithAi);
 export default courseRouter;

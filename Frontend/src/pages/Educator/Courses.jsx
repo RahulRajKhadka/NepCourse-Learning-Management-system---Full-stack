@@ -318,8 +318,6 @@ const Courses = () => {
               </p>
             </div>
           </div>
-
-          
         </div>
       </div>
     </>

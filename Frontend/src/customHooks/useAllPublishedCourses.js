@@ -17,7 +17,6 @@ const useAllPublishedCourses = () => {
         dispatch(setLoading(true));
         console.log("Fetching all published courses...");
 
-        // ✅ CHANGED: /api/course/ → /api/courses/
         const result = await axios.get(
           serverUrl + "/api/courses/getPublishedCourses",
           {

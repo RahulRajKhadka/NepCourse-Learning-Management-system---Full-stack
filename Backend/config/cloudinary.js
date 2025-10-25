@@ -2,7 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import dotenv from "dotenv";
 
-// Load environment variables
+
 dotenv.config();
 
 cloudinary.config({
@@ -17,7 +17,6 @@ export const uploadOnCloudinary = async (filePath) => {
       throw new Error("File path is required");
     }
 
-    // Check if file exists
     if (!fs.existsSync(filePath)) {
       throw new Error(`File not found at path: ${filePath}`);
     }
@@ -33,7 +32,7 @@ export const uploadOnCloudinary = async (filePath) => {
 
     console.log("Upload successful:", result.secure_url);
 
-    // Delete the temporary file after successful upload
+
     fs.unlinkSync(filePath);
 
     return {
@@ -46,8 +45,7 @@ export const uploadOnCloudinary = async (filePath) => {
     };
   } catch (error) {
     console.error("Cloudinary upload error:", error);
-    
-    // Delete the temporary file even if upload fails
+ 
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);

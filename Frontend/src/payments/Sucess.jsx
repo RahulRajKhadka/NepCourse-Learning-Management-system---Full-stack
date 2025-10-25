@@ -16,17 +16,17 @@ const Success = () => {
           return;
         }
 
-        // ✅ Verify from backend if the user is enrolled after payment
+        
         const res = await axios.get(
           `http://localhost:5000/api/enrollment/status?courseId=${courseId}`,
           { withCredentials: true }
         );
 
         if (res.data.success) {
-          // ✅ Automatically redirect to the course page
+         
           navigate(`/view-course/${courseId}`);
         } else {
-          // ❌ If enrollment failed, stay here with message
+        
           setVerifying(false);
         }
       } catch (err) {

@@ -1,7 +1,7 @@
 import Courses from "../Model/courseModel.js";
 import Review from "../Model/reviewModel.js";
 
-// Create a new review
+
 export const createReview = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -10,7 +10,6 @@ export const createReview = async (req, res) => {
 
     console.log("📝 Creating review:", { courseId, userId, rating, comment: comment?.substring(0, 50) });
 
-    // Validation
     if (!rating || !comment) {
       return res.status(400).json({ 
         success: false,
@@ -54,7 +53,7 @@ export const createReview = async (req, res) => {
       });
     }
 
-    // Create review
+   
     const review = new Review({
       user: userId,
       course: courseId,
@@ -65,12 +64,11 @@ export const createReview = async (req, res) => {
     await review.save();
     console.log(" Review saved:", review._id);
 
-    // Add review ID to course (not the entire review object)
+   
     course.reviews.push(review._id);
     await course.save();
     console.log(" Course updated with review ID");
 
-    // Populate user data for response
     await review.populate("user", "name photoUrl role");
 
     res.status(201).json({
@@ -79,7 +77,7 @@ export const createReview = async (req, res) => {
       review
     });
   } catch (error) {
-    console.error("❌ Error creating review:", error);
+    console.error(" Error creating review:", error);
     res.status(500).json({ 
       success: false,
       message: "Error creating review", 
@@ -93,7 +91,7 @@ export const getReviewsByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    console.log("📥 Fetching reviews for course:", courseId);
+    console.log("Fetching reviews for course:", courseId);
 
     // Check if course exists
     const course = await Courses.findById(courseId);
@@ -123,7 +121,7 @@ export const getReviewsByCourse = async (req, res) => {
       totalReviews: reviews.length
     });
   } catch (error) {
-    console.error("❌ Error fetching reviews:", error);
+    console.error("Error fetching reviews:", error);
     res.status(500).json({ 
       success: false,
       message: "Error fetching reviews", 
@@ -132,7 +130,6 @@ export const getReviewsByCourse = async (req, res) => {
   }
 };
 
-// Check if user has reviewed a course
 export const checkUserReview = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -145,7 +142,7 @@ export const checkUserReview = async (req, res) => {
       course: courseId 
     });
 
-    console.log(review ? "✅ User has reviewed" : "❌ User has not reviewed");
+    console.log(review ? " User has reviewed" : " User has not reviewed");
 
     res.status(200).json({
       success: true,
@@ -153,7 +150,7 @@ export const checkUserReview = async (req, res) => {
       review: review || null
     });
   } catch (error) {
-    console.error("❌ Error checking user review:", error);
+    console.error(" Error checking user review:", error);
     res.status(500).json({ 
       success: false,
       message: "Error checking review", 
@@ -185,7 +182,7 @@ export const deleteReview = async (req, res) => {
       });
     }
 
-    // Remove review from course
+  
     await Courses.findByIdAndUpdate(
       review.course,
       { $pull: { reviews: reviewId } }

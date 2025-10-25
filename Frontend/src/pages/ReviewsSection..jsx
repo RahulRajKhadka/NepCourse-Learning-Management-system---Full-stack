@@ -161,7 +161,7 @@ const ReviewsSection = ({ courseId, isEnrolled }) => {
         setUserReviewData(response.data.review);
         setIsEditing(false);
         
-        // Refresh reviews
+ 
         await fetchReviews();
       }
     } catch (error) {
@@ -189,7 +189,7 @@ const ReviewsSection = ({ courseId, isEnrolled }) => {
         setUserReview({ rating: 0, comment: "" });
         setShowDeleteConfirm(false);
         
-        // Refresh reviews
+       
         await fetchReviews();
       }
     } catch (error) {
@@ -376,7 +376,7 @@ const ReviewsSection = ({ courseId, isEnrolled }) => {
           </div>
         )}
 
-        {/* User's Review Display (when not editing) */}
+       
         {isEnrolled && hasSubmittedReview && !isEditing && userReviewData && (
           <div className="mb-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 sm:p-6 border border-green-200">
             <div className="flex items-start justify-between mb-4">

@@ -89,7 +89,7 @@ const MyEnrolledCourse = () => {
     );
   }
 
-  // Enhanced Error State
+  
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
@@ -150,7 +150,7 @@ const MyEnrolledCourse = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 sm:px-6 py-8">
-        {/* Enhanced Header */}
+       
         <div className="flex items-center gap-4 mb-8">
           <button
             className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200 group"
@@ -170,7 +170,7 @@ const MyEnrolledCourse = () => {
           </div>
         </div>
 
-        {/* Enhanced Stats Cards */}
+
         {enrollments.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -221,7 +221,6 @@ const MyEnrolledCourse = () => {
           </div>
         )}
 
-        {/* Enhanced Empty State */}
         {enrollments.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-2xl mx-auto">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center">
@@ -243,7 +242,7 @@ const MyEnrolledCourse = () => {
           </div>
         ) : (
           <>
-            {/* Enhanced Courses Grid */}
+     
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {enrollments.map((enrollment) => {
                 const course = enrollment.course;
@@ -269,7 +268,7 @@ const MyEnrolledCourse = () => {
                         }}
                       />
 
-                      {/* Status Badge */}
+                  
                       <div className="absolute top-3 right-3">
                         {isCompleted ? (
                           <div className="bg-green-500 text-white rounded-full px-3 py-1.5 shadow-lg backdrop-blur-sm">
@@ -287,14 +286,14 @@ const MyEnrolledCourse = () => {
                         )}
                       </div>
 
-                      {/* Category Badge */}
+                     
                       <div className="absolute top-3 left-3">
                         <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
                           {course.category}
                         </span>
                       </div>
 
-                      {/* Play Overlay */}
+                  
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
                         <div className="transform scale-0 group-hover:scale-100 transition-transform duration-300">
                           <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl">
@@ -304,19 +303,19 @@ const MyEnrolledCourse = () => {
                       </div>
                     </div>
 
-                    {/* Content */}
+                 
                     <div className="p-5">
-                      {/* Title */}
+                    
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {course.title}
                       </h3>
 
-                      {/* Description */}
+                      
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
                         {course.description}
                       </p>
 
-                      {/* Meta Info */}
+                  
                       <div className="flex items-center gap-4 mb-4 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                           <FaClock className="w-3 h-3" />
@@ -357,7 +356,7 @@ const MyEnrolledCourse = () => {
                         </p>
                       </div>
 
-                      {/* Continue Button */}
+                    
                       <button
                         className={`w-full mt-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
                           isCompleted

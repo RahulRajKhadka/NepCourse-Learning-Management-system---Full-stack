@@ -41,7 +41,7 @@ function ForgetPassword() {
     }
   };
 
-  // Step 2: Verify OTP
+
   const verifyOtp = async () => {
     if (!otp.trim()) {
       toast.error("Please enter the OTP");
@@ -66,7 +66,6 @@ function ForgetPassword() {
     }
   };
 
-  // Step 3: Reset Password
   const resetPassword = async () => {
     if (!Newpassword.trim() || !confirmPassword.trim()) {
       toast.error("Please fill in all password fields");

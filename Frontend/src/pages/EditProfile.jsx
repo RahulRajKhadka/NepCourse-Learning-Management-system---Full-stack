@@ -113,17 +113,17 @@ const EditProfile = () => {
 
       setSuccess("Profile updated successfully!");
 
-      // Update Redux store with the response data or construct it
+      
       const updatedUserData = {
         ...userData,
         name: formData.name.trim(),
         description: formData.description.trim(),
-        photoUrl: responseData.photoUrl || userData.photoUrl, // Use server response or keep existing
+        photoUrl: responseData.photoUrl || userData.photoUrl,
       };
 
       dispatch(setUserData(updatedUserData));
 
-      // Navigate back to profile page after a short delay
+      
       setTimeout(() => {
         navigate("/profile");
       }, 1500);
@@ -222,7 +222,7 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* Description/Bio Field */}
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Bio
@@ -238,7 +238,7 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* Submit Button */}
+       
           <button
             type="submit"
             disabled={isLoading}

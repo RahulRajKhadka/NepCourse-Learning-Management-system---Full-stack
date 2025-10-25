@@ -5,16 +5,13 @@ import ai from "../assets/SearchAi.png";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import Card from "../Component/Card";
-import useAllPublishedCourses from "../customHooks/useAllPublishedCourses"; // ✅ Correct hook name
+import useAllPublishedCourses from "../customHooks/useAllPublishedCourses";
+import { Navigate } from "react-router-dom";
 
 function AllCourses() {
   const navigate = useNavigate();
-  useAllPublishedCourses(); // ✅ Fetch all published courses from all educators
+  const { publishedCourses, loading } = useAllPublishedCourses(); 
 
-  // ✅ FIXED: Use the correct Redux path
-  const publishedCourses = useSelector(
-    (state) => state.course.allPublishedCourses
-  );
 
   const [category, setCategory] = useState([]);
   const [filterCourses, setFilterCourses] = useState([]);
@@ -60,7 +57,7 @@ function AllCourses() {
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
       <Nav />
 
-      <div className="flex flex-1 relative ">
+      <div className="flex flex-1 relative">
         {!isSidebarOpen && (
           <button
             className="md:hidden fixed right-5 top-25 bg-black text-white px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-800 transition-colors"
@@ -141,7 +138,7 @@ function AllCourses() {
               <h3 className="font-medium text-gray-800 text-sm uppercase tracking-wide">
                 Categories
               </h3>
-              <div className="space-y-3 bg-gray-50 border rounded-xl p-4  ">
+              <div className="space-y-3 bg-gray-50 border rounded-xl p-4">
                 {[
                   "App Development",
                   "Web Development",
@@ -172,6 +169,7 @@ function AllCourses() {
               <button
                 type="submit"
                 className="flex items-center justify-center gap-2 w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
+                onClick={() => navigate("/search")}
               >
                 Search with AI
                 <img
@@ -201,7 +199,9 @@ function AllCourses() {
               All Courses
             </h1>
             <p className="text-gray-600 text-sm md:text-base">
-              {filterCourses.length > 0
+              {loading
+                ? "Loading courses..."
+                : filterCourses.length > 0
                 ? `Showing ${filterCourses.length} course${
                     filterCourses.length !== 1 ? "s" : ""
                   }${category.length > 0 ? ` in selected categories` : ""}`
@@ -209,7 +209,14 @@ function AllCourses() {
             </p>
           </div>
 
-          {filterCourses?.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+              <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+              <p className="text-gray-500 text-lg font-medium">
+                Loading courses...
+              </p>
+            </div>
+          ) : filterCourses?.length > 0 ? (
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {filterCourses.map((course, index) => (
                 <Card
@@ -228,14 +235,28 @@ function AllCourses() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-64 space-y-4">
-              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center"></div>
+              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-10 h-10 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  />
+                </svg>
+              </div>
               <div className="text-center">
                 <p className="text-gray-500 text-lg font-medium">
                   {publishedCourses?.length === 0
                     ? "No courses available"
                     : category.length > 0
                     ? "No courses match your filters"
-                    : "Loading courses..."}
+                    : "No courses found"}
                 </p>
                 {category.length > 0 && (
                   <button
@@ -248,7 +269,7 @@ function AllCourses() {
               </div>
             </div>
           )}
-        </main>+
+        </main>
       </div>
     </div>
   );

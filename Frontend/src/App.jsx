@@ -27,6 +27,7 @@ import Failure from "./payments/Failure.jsx";
 import MyCourses from "./pages/MyEnrolledCourses.jsx";
 import ViewLecture from "./pages/ViewLecture.jsx";
 import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
+import SearchWithAi from "./pages/SearchwithAi.jsx";
 
 export const App = () => {
   useGetCurrentUser();
@@ -61,7 +62,7 @@ export const App = () => {
           element={userData ? <AllCourses /> : <Navigate to="/signup" />}
         />
         <Route path="/Dashboard" element={<Dashboard />} />
-        {/* 👇 protect these like EditProfile */}
+    
         <Route
           path="/create"
           element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
@@ -98,6 +99,7 @@ export const App = () => {
         <Route path="/my-courses" element={<MyCourses />} />
         <Route path="/viewlecture/:courseId" element={<ViewLecture />} />
         <Route path="/my-enrolled-courses" element={<MyEnrolledCourse />} />
+        <Route path="/search" element={<SearchWithAi />} />
       </Routes>
     </>
   );

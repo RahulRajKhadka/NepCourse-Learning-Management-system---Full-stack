@@ -1,22 +1,25 @@
+// ===========================================================
+// TABLE OF CONTENTS
+// 1. ======== USER REGISTRATION ========
+// 2. ======== PASSWORD & OTP MANAGEMENT ========
+// 3. ======== LOGIN & LOGOUT ========
+// 4. ======= OTP VERIFICATION ========
+// 5. GOOGLE AUTHENTICATION
+// ===========================================================
+
 import User from "../Model/userModel.js";
 import genToken from "../config/token.js";
 import validator from "validator";
 import sendMail from "../config/sendMail.js";
 import bcrypt from "bcryptjs";
 
+// ===========================================================
+// 1. ======== USER REGISTRATION ========
+// ===========================================================
 export const signUP = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    
-  
-    console.log("Received signup data:", { 
-      name, 
-      email, 
-      role, 
-      passwordProvided: !!password 
-    });
 
-  
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -24,8 +27,7 @@ export const signUP = async (req, res) => {
       });
     }
 
-   
-    const validRoles = ['student', 'educator', 'teacher', 'admin'];
+    const validRoles = ["student", "educator", "teacher", "admin"];
     if (role && !validRoles.includes(role)) {
       return res.status(400).json({
         success: false,
@@ -33,7 +35,6 @@ export const signUP = async (req, res) => {
       });
     }
 
- 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -42,25 +43,22 @@ export const signUP = async (req, res) => {
       });
     }
 
-   
     const user = await User.create({
       name,
       email,
-      password, 
-      role: role || 'student' 
+      password,
+      role: role || "student",
     });
 
-    // Generate token
     const token = genToken(user._id);
 
-    // Return user data without password - INCLUDE ROLE
     const userData = {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role, // ✅ Include role in response
-      photoUrl: user.photoUrl || null, // Handle undefined gracefully
-      description: user.description || null, // Handle undefined gracefully
+      role: user.role,
+      photoUrl: user.photoUrl || null,
+      description: user.description || null,
       createdAt: user.createdAt,
     };
 
@@ -71,33 +69,26 @@ export const signUP = async (req, res) => {
       user: userData,
     });
   } catch (error) {
-    console.error("Register error:", error);
-    
-    // Handle mongoose validation errors more specifically
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: "Validation error: " + messages.join(', '),
-      });
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res
+        .status(400)
+        .json({ success: false, message: messages.join(", ") });
     }
-    
-    // Handle duplicate key errors (in case email index exists)
     if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already exists" });
     }
-
-    res.status(500).json({
-      success: false,
-      message: "Server error during registration",
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error during registration" });
   }
 };
 
-
+// ===========================================================
+// 2. ======== PASSWORD & OTP MANAGEMENT ========
+// ===========================================================
 export const resetPassword = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -120,56 +111,46 @@ export const resetPassword = async (req, res) => {
         .json({ message: "Password should be at least 6 characters long" });
     }
 
-    // Just assign the password - let the model middleware handle hashing
     user.password = password;
     user.isOtpVerified = false;
 
-    await user.save(); // This will trigger the pre('save') middleware
+    await user.save();
 
     return res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
-    console.error(`Error resetting password: ${error.message}`);
     return res
       .status(500)
       .json({ message: `Error resetting password: ${error.message}` });
   }
 };
 
-// Login function remains the same - it's correct
+// ===========================================================
+// 3. ======== LOGIN & LOGOUT ========
+// ===========================================================
 export const login = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
-
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
     }
 
-    // Fetch user with password explicitly
-    let user = await User.findOne({ email }).select("+password");
-    console.log("User from DB:", user);
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Compare passwords - this should work correctly now
     const isMatch = await bcrypt.compare(password.trim(), user.password);
-    console.log("Password match result:", isMatch);
-    console.log("Raw password:", password.trim());
-    console.log("Hashed password from DB:", user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    // Generate JWT token
     const token = genToken(user._id);
 
-    // Set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Only secure in production
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -184,23 +165,22 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
     return res.status(500).json({ message: `Login error: ${error.message}` });
   }
 };
 
-
-
 export const logOut = async (req, res) => {
   try {
     res.clearCookie("token");
-
-    return res.status(200).json({
-      message: "logout sucessfully",
-    });
-  } catch (error) {}
+    return res.status(200).json({ message: "Logout successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Logout error" });
+  }
 };
 
+// ===========================================================
+// 4. ======== OTP VERIFICATION ========
+// ===========================================================
 export const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -216,7 +196,7 @@ export const sendOTP = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetOtp = otp;
-    user.otpExpiresIn = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.otpExpiresIn = Date.now() + 10 * 60 * 1000;
     user.isOtpVerified = false;
 
     await user.save();
@@ -224,7 +204,6 @@ export const sendOTP = async (req, res) => {
 
     return res.status(200).json({ message: "OTP sent to email" });
   } catch (error) {
-    console.error(`Error sending OTP: ${error.message}`);
     return res
       .status(500)
       .json({ message: `Error sending OTP: ${error.message}` });
@@ -260,95 +239,76 @@ export const verifyOTP = async (req, res) => {
     await user.save();
     return res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
-    console.error(`Error verifying OTP: ${error.message}`);
     return res
       .status(500)
       .json({ message: `Error verifying OTP: ${error.message}` });
   }
 };
 
-
+// ===========================================================
+// 5. ======== GOOGLE AUTHENTICATION ========
+// ===========================================================
 export const googleAuth = async (req, res) => {
   try {
     const { name, email, photoUrl, role = "student" } = req.body;
-    
-    // Basic validation
+
     if (!name || !email) {
-      return res.status(400).json({
-        success: false,
-        message: "Name and email are required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Name and email are required" });
     }
-    
-    // Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email format",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
     }
-    
-    // Check if user exists
+
     let user = await User.findOne({ email: email.toLowerCase().trim() });
     let isNewUser = false;
-    
+
     if (!user) {
-      // Create new user with Google auth (no password required)
       user = await User.create({
         name: name.trim(),
         email: email.toLowerCase().trim(),
         role: role.trim(),
-        authProvider: "google", // This makes password not required
+        authProvider: "google",
         photoUrl: photoUrl || "",
         description: "",
         isEmailVerified: true,
-        // Note: No password field for Google users
       });
       isNewUser = true;
-      console.log("New Google user created:", user._id);
     } else {
-      // Check if existing user is trying to sign in with different auth method
-      if (user.authProvider === 'local') {
+      if (user.authProvider === "local") {
         return res.status(400).json({
           success: false,
-          message: "Email already exists with email/password login. Please use your password to sign in.",
+          message:
+            "Email already exists with email/password login. Please use your password to sign in.",
         });
       }
-      
-      // Update existing Google user info if needed
+
       let updateFields = {};
-      
-      if (user.name !== name.trim()) {
-        updateFields.name = name.trim();
-      }
-      
-      if (photoUrl && user.photoUrl !== photoUrl) {
+      if (user.name !== name.trim()) updateFields.name = name.trim();
+      if (photoUrl && user.photoUrl !== photoUrl)
         updateFields.photoUrl = photoUrl;
-      }
-      
+
       if (Object.keys(updateFields).length > 0) {
         updateFields.updatedAt = new Date();
-        user = await User.findByIdAndUpdate(
-          user._id,
-          updateFields,
-          { new: true }
-        );
-        console.log("Google user updated:", user._id);
+        user = await User.findByIdAndUpdate(user._id, updateFields, {
+          new: true,
+        });
       }
     }
-    
-    // Generate token and set cookie
+
     const token = genToken(user._id);
-    
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    
-    // Prepare user data for frontend (exclude sensitive info)
+
     const userData = {
       id: user._id,
       _id: user._id,
@@ -361,39 +321,32 @@ export const googleAuth = async (req, res) => {
       isEmailVerified: user.isEmailVerified,
       createdAt: user.createdAt,
     };
-    
+
     return res.status(200).json({
       success: true,
-      message: isNewUser 
-        ? "Account created successfully with Google" 
+      message: isNewUser
+        ? "Account created successfully with Google"
         : "Google sign-in successful",
       user: userData,
       isNewUser,
     });
-    
   } catch (error) {
-    console.error("Google Auth Error:", error);
-    
-    // Handle specific MongoDB errors
     if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already exists" });
     }
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: messages.join(', '),
-      });
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res
+        .status(400)
+        .json({ success: false, message: messages.join(", ") });
     }
-    
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error during authentication",
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error during authentication",
+      });
   }
 };

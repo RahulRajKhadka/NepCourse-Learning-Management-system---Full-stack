@@ -9,6 +9,8 @@ import userRouter from "./Routes/userRoute.js";
 import paymentRouter from "./Routes/paymentRoutes.js";
 import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
 import reviewRouter from './Routes/reviewRoute.js';
+import dashboardRouter from "./Routes/dashboardRoutes.js";
+
 
 
 dotenv.config();
@@ -33,6 +35,8 @@ app.use("/api/courses", courseRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/enrollment", enrollmentRoutes);
 app.use('/api/review', reviewRouter);
+app.use("/api/dashboard", dashboardRouter);
+
 
 
 app.get("/", (req, res) => {

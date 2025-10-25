@@ -55,22 +55,22 @@ const ExploreCourses = () => {
   ];
 
   return (
-    <div className="w-full min-h-[60vh] flex flex-col lg:flex-row items-center justify-center px-6 lg:px-16 gap-10">
+    <div className="w-full min-h-[60vh] flex flex-col xl:flex-row items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 gap-6 sm:gap-8 lg:gap-10 py-8 sm:py-12">
       {/* Left Div */}
-      <div className="w-full lg:w-1/2 flex flex-col items-start justify-center gap-4">
-        <h2 className="text-4xl font-bold leading-tight">
+      <div className="w-full xl:w-1/2 flex flex-col items-center xl:items-start justify-center gap-3 sm:gap-4 text-center xl:text-left">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
           Explore
           <br />
           Our Courses
         </h2>
-        <p className="text-lg text-gray-700">
+        <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-2xl">
           Discover cutting-edge technology courses designed to elevate your
           skills. From AI and machine learning to web development and data
           science, unlock your potential with our comprehensive learning
           programs.
         </p>
         <motion.button
-          className="px-6 py-3 border-2 bg-black border-white text-white rounded-xl text-lg font-light flex gap-2 mt-6"
+          className="px-4 sm:px-6 py-2 sm:py-3 border-2 bg-black border-white text-white rounded-lg sm:rounded-xl text-base sm:text-lg font-light flex items-center gap-2 mt-4 sm:mt-6"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate("/allcourses")}
@@ -80,26 +80,26 @@ const ExploreCourses = () => {
             animate={{ rotate: 360 }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
           >
-            <Play className="w-5 h-5 fill-white" />
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-white" />
           </motion.div>
         </motion.button>
       </div>
 
       {/* Right Div (Icons Grid) */}
-      <div className="w-full lg:w-1/2 flex flex-wrap justify-center gap-5">
+      <div className="w-full xl:w-1/2 flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 mt-6 xl:mt-0">
         {courses.map((course, index) => {
           const IconComponent = course.icon;
           return (
             <motion.div
               key={index}
-              className="w-[80px] flex flex-col items-center flex-wrap gap-3 text-center cursor-pointer"
+              className="w-[70px] sm:w-[80px] md:w-[90px] lg:w-[100px] flex flex-col items-center gap-2 sm:gap-3 text-center cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.1 }}
             >
               <motion.div
-                className={`w-[50px] h-[50px] bg-gradient-to-br ${course.color} rounded-lg flex items-center justify-center shadow-lg`}
+                className={`w-[45px] h-[45px] sm:w-[50px] sm:h-[50px] md:w-[55px] md:h-[55px] bg-gradient-to-br ${course.color} rounded-lg flex items-center justify-center shadow-lg`}
                 whileHover={{
                   boxShadow:
                     "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
@@ -114,11 +114,11 @@ const ExploreCourses = () => {
                     ease: "linear",
                   }}
                 >
-                  <IconComponent className="w-6 h-10 text-white drop-shadow-lg" />
+                  <IconComponent className="w-5 h-8 sm:w-6 sm:h-10 text-white drop-shadow-lg" />
                 </motion.div>
               </motion.div>
               <motion.span
-                className="text-gray-700 text-sm font-medium"
+                className="text-gray-700 text-xs sm:text-sm font-medium leading-tight"
                 whileHover={{ color: "#7c3aed" }}
               >
                 {course.name}

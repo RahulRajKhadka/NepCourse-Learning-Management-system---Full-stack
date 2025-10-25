@@ -27,10 +27,10 @@ const paymentSchema = new mongoose.Schema(
       default: "pending",
     },
     gatewayOrderId: {
-      type: String, // eSewa PID or Khalti token
+      type: String, 
     },
     gatewayResponse: {
-      type: Object, // Store full response from gateway if needed
+      type: Object, 
     },
     paidAt: {
       type: Date,

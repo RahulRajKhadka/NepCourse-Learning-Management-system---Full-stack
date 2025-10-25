@@ -18,7 +18,7 @@ const useEducatorCourses = () => {
         dispatch(setLoading(true));
         console.log("Fetching educator courses...");
 
-        // ✅ CHANGED: /api/course/ → /api/courses/
+       
         const result = await axios.get(
           serverUrl + "/api/courses/getCreatorCourse",
           {
@@ -32,7 +32,7 @@ const useEducatorCourses = () => {
         console.log("Educator courses fetched:", result.data);
 
         if (result.data.success) {
-          // This automatically populates both creatorCourses and educatorPublishedCourses
+       
           dispatch(setCreatorCourses(result.data.courses));
 
           const published = result.data.courses.filter(

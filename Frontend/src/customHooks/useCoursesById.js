@@ -17,7 +17,6 @@ const useCourseById = (courseId) => {
         dispatch(setLoading(true));
         console.log("Fetching course by ID:", courseId);
 
-        // ✅ CHANGED: /api/course/ → /api/courses/
         const result = await axios.get(
           serverUrl + `/api/courses/getCourseById/${courseId}`,
           {

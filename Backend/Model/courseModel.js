@@ -36,44 +36,48 @@ const courseSchema = new mongoose.Schema(
     },
     enrolledStudents: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: 'User',
+      ref: "User",
       default: [],
     },
-    lectures: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Lecture"
-    }],
+    lectures: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lecture",
+      },
+    ],
     creator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     isPublished: {
       type: Boolean,
-      default: false
+      default: false,
     },
     reviews: {
-      type: [{
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-          required: true
+      type: [
+        {
+          user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+          rating: {
+            type: Number,
+            min: 1,
+            max: 5,
+            required: true,
+          },
+          comment: {
+            type: String,
+            required: true,
+          },
         },
-        rating: {
-          type: Number,
-          min: 1,
-          max: 5,
-          required: true
-        },
-        comment: {
-          type: String,
-          required: true
-        }
-      }],
-      default: []
-    }
+      ],
+      default: [],
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Course = mongoose.model("Course", courseSchema);

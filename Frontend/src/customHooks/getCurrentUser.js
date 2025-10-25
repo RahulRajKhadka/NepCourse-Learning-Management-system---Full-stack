@@ -22,7 +22,6 @@ const useGetCurrentUser = () => {
 
         console.log("User data fetched:", result.data);
 
-        // Handle both response formats
         const userData = result.data.user || result.data;
         dispatch(setUserData(userData));
       } catch (error) {

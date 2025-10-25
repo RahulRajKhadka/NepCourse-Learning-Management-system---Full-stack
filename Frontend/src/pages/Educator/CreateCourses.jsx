@@ -41,7 +41,7 @@ function CreateCourse() {
       console.log("User data:", userData);
 
       const result = await axios.post(
-        serverUrl + "/api/course/create",
+        serverUrl + "/api/courses/create",
         { title, category },
         { withCredentials: true }
       );
@@ -49,11 +49,9 @@ function CreateCourse() {
       console.log("Success response:", result.data);
       toast.success("Course created successfully!");
 
-      // Clear form
       setTitle("");
       setCategory("");
 
-      // Navigate to courses page
       navigate("/courses");
     } catch (error) {
       console.error("Full error object:", error);

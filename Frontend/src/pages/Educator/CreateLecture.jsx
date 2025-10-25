@@ -51,7 +51,6 @@ function CreateLecture() {
     }
   };
 
-  // Fetch lectures only once when component mounts or courseId changes
   useEffect(() => {
     const getCourseLectures = async () => {
       if (!courseId) return;
@@ -92,7 +91,7 @@ function CreateLecture() {
     };
 
     getCourseLectures();
-  }, [courseId, dispatch]); // Only depend on courseId and dispatch
+  }, [courseId, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

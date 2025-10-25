@@ -3,8 +3,8 @@ dotenv.config();
 
 import EsewaService from "../utils/esewa.js";
 import axios from "axios";
-import Enrollment from "../Model/Enrollment.js"; // Import your Enrollment model
-import Course from "../Model/courseModel.js"; // Import Course model
+import Enrollment from "../Model/Enrollment.js";
+import Course from "../Model/courseModel.js"; 
 
 // Unified initiate endpoint used by frontend
 export const initiateCoursePayment = async (req, res) => {
@@ -133,7 +133,7 @@ export const initiateCoursePayment = async (req, res) => {
   }
 };
 
-// Render form
+
 export const renderEsewaFormAndSubmit = (req, res) => {
   const q = req.query;
   const paymentEndpoint = EsewaService.paymentUrl;
@@ -193,24 +193,24 @@ export const esewaSuccess = async (req, res) => {
       return res.redirect(302, `${clientBase}/payment-failure`);
     }
 
-    // ✅ Verify payment
+    
     const status = await EsewaService.checkPaymentStatus({
       transactionUuid,
       totalAmount,
     });
 
     if (status?.status === "COMPLETE") {
-      // ✅ CREATE ENROLLMENT
+      
       if (courseId && userId) {
         try {
-          // Check if already enrolled
+          
           let enrollment = await Enrollment.findOne({ 
             user: userId, 
             course: courseId 
           });
 
           if (!enrollment) {
-            // Create new enrollment
+            
             enrollment = await Enrollment.create({
               user: userId,
               course: courseId,
@@ -223,20 +223,20 @@ export const esewaSuccess = async (req, res) => {
               completedLectures: [],
             });
 
-            // Update course enrollment count
+           
             await Course.findByIdAndUpdate(courseId, {
               $inc: { enrollmentCount: 1 }
             });
 
-            console.log("✅ Enrollment created:", enrollment._id);
+            console.log(" Enrollment created:", enrollment._id);
           } else {
-            console.log("ℹ️ User already enrolled");
+            console.log("ℹ User already enrolled");
           }
 
-          // Redirect with courseId
+         
           return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}`);
         } catch (dbError) {
-          console.error("❌ Database error:", dbError);
+          console.error(" Database error:", dbError);
           return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}&warning=enrollment-failed`);
         }
       }

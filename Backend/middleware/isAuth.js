@@ -11,19 +11,19 @@ const isAuth = async (req, res, next) => {
     
     let token;
 
-    // First try to get token from Authorization header
+    
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
       console.log("✅ Token found in Authorization header");
     } 
-    // Fallback to cookies if no header token
+   
     else if (req.cookies.token) {
       token = req.cookies.token;
       console.log("✅ Token found in cookies");
     }
 
     if (!token) {
-      console.log("❌ No token found in cookies or Authorization header");
+      console.log(" No token found in cookies or Authorization header");
       return res.status(401).json({
         success: false,
         message: "Access denied. No token provided."
@@ -32,16 +32,16 @@ const isAuth = async (req, res, next) => {
 
     console.log("✅ Token found, attempting to verify...");
     
-    // Verify token
+  
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("✅ Token verified, decoded:", decoded);
     
-    // Get user from database
+  
     const user = await User.findById(decoded.id).select("-password");
     console.log("✅ User found:", user ? "Yes" : "No");
     
     if (!user) {
-      console.log("❌ User not found in database");
+      console.log(" User not found in database");
       return res.status(401).json({
         success: false,
         message: "Token is valid but user not found"
@@ -49,11 +49,11 @@ const isAuth = async (req, res, next) => {
     }
     
     req.user = user;
-    console.log("✅ Auth successful, proceeding...");
+    console.log(" Auth successful, proceeding...");
     next();
 
   } catch (error) {
-    console.error("❌ Auth middleware error:", error.message);
+    console.error(" Auth middleware error:", error.message);
     return res.status(401).json({
       success: false,
       message: "Token is not valid"

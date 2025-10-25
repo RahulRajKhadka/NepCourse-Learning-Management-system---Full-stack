@@ -1,4 +1,4 @@
-// models/Enrollment.js
+
 import mongoose from "mongoose";
 
 const enrollmentSchema = new mongoose.Schema(
@@ -8,6 +8,13 @@ const enrollmentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
       index: true,
+    },
+    payment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Payment", 
+      required: function () {
+        return this.enrollmentType === "paid";
+      },
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
@@ -24,7 +31,7 @@ const enrollmentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Payment",
       // Only required for paid courses
-      required: function() {
+      required: function () {
         return this.enrollmentType === "paid";
       },
     },
@@ -34,9 +41,11 @@ const enrollmentSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
-    completedLectures: [{
-      type: mongoose.Schema.Types.ObjectId,
-    }],
+    completedLectures: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+      },
+    ],
     status: {
       type: String,
       enum: ["active", "completed", "dropped"],
@@ -50,27 +59,25 @@ const enrollmentSchema = new mongoose.Schema(
       // For courses with expiration (optional)
     },
   },
-  { 
+  {
     timestamps: true,
     // Ensure a user can't enroll in the same course twice
-    indexes: [
-      { user: 1, course: 1, unique: true }
-    ]
-  }
+    indexes: [{ user: 1, course: 1, unique: true }],
+  },
 );
 
 // Static method to check if user is enrolled
-enrollmentSchema.statics.isEnrolled = async function(userId, courseId) {
-  const enrollment = await this.findOne({ 
-    user: userId, 
+enrollmentSchema.statics.isEnrolled = async function (userId, courseId) {
+  const enrollment = await this.findOne({
+    user: userId,
     course: courseId,
-    status: "active"
+    status: "active",
   });
   return !!enrollment;
 };
 
 // Instance method to update progress
-enrollmentSchema.methods.updateProgress = function(lectureId) {
+enrollmentSchema.methods.updateProgress = function (lectureId) {
   if (!this.completedLectures.includes(lectureId)) {
     this.completedLectures.push(lectureId);
   }
