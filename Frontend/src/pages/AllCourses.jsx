@@ -1,6 +1,6 @@
 import { FaArrowLeft, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Nav from "../component/Nav";
+import Nav from "../components/Nav.jsx";
 import ai from "../assets/SearchAi.png";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
