@@ -5,7 +5,7 @@ import {
   checkEnrollment,
   updateProgress,
 } from "../Controller/EnrollmentController.js";
-import isAuth from "../Middleware/isAuth.js";
+import isAuth from "../middleware/isAuth.js";
 
 const router = express.Router();
 router.use(isAuth);
