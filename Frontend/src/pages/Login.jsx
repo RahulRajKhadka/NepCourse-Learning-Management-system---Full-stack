@@ -57,7 +57,7 @@ export const Login = () => {
         },
         {
           withCredentials: true,
-          timeout: 10000,
+          timeout: 6000,
           headers: {
             "Content-Type": "application/json",
           },
