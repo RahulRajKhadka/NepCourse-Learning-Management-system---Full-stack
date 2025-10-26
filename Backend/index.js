@@ -18,13 +18,15 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// CORS Configuration
 app.use(
   cors({
     origin:
       process.env.FRONTEND_URL ||
       "https://nepcourse-learning-management-system-0cwc.onrender.com",
     credentials: true,
-  }),
+  })
 );
 
 // Routes

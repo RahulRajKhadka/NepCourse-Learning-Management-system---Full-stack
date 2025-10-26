@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
+export const serverUrl = " https://nepcourse-learning-management-system-7zk8.onrender.com";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
