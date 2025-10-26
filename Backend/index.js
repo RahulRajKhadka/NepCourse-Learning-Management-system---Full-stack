@@ -8,13 +8,10 @@ import cors from "cors";
 import userRouter from "./Routes/userRoute.js";
 import paymentRouter from "./Routes/paymentRoutes.js";
 import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
-import reviewRouter from './Routes/reviewRoute.js';
+import reviewRouter from "./Routes/reviewRoute.js";
 import dashboardRouter from "./Routes/dashboardRoutes.js";
 
-
-
 dotenv.config();
-
 const port = process.env.PORT || 8000;
 const app = express();
 
@@ -23,7 +20,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:
+      process.env.FRONTEND_URL ||
+      "https://nepcourse-learning-management-system-0cwc.onrender.com",
     credentials: true,
   }),
 );
@@ -34,10 +33,8 @@ app.use("/api/user", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/enrollment", enrollmentRoutes);
-app.use('/api/review', reviewRouter);
+app.use("/api/review", reviewRouter);
 app.use("/api/dashboard", dashboardRouter);
-
-
 
 app.get("/", (req, res) => {
   res.send("Hello from the server");

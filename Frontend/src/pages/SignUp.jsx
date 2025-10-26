@@ -309,7 +309,7 @@ export function SignUp() {
             </button>
           </div>
 
-          {/* Sign Up Button */}
+          
           <button
             type="submit"
             className="w-full max-w-[350px] bg-blue-500 h-[44px] text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 cursor-pointer transition-colors flex items-center justify-center font-medium text-sm sm:text-base"
