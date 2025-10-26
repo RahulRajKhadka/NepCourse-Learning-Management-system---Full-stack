@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
-export const serverUrl = " https://nepcourse-learning-management-system-7zk8.onrender.com";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
@@ -28,16 +27,9 @@ import MyCourses from "./pages/MyEnrolledCourses.jsx";
 import ViewLecture from "./pages/ViewLecture.jsx";
 import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
 import SearchWithAi from "./pages/SearchwithAi.jsx";
-import axios from "axios";
 
-// Configure axios defaults globally
-axios.defaults.timeout = 60000; // 60 seconds for Render cold starts
-axios.defaults.withCredentials = true;
-
-// Backend URL - will use localhost in dev, Render URL in production
-export const serverUrl =
-  import.meta.env.VITE_SERVER_URL ||
-  "https://nepcourse-learning-management-system-7zk8.onrender.com";
+// Import api config to initialize axios defaults
+import './config/api.js';
 
 export const App = () => {
   useGetCurrentUser();
@@ -72,7 +64,7 @@ export const App = () => {
           element={userData ? <AllCourses /> : <Navigate to="/signup" />}
         />
         <Route path="/Dashboard" element={<Dashboard />} />
-
+    
         <Route
           path="/create"
           element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
@@ -91,13 +83,7 @@ export const App = () => {
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
-          element={
-            userData?.role === "educator" ? (
-              <EditLecture />
-            ) : (
-              <Navigate to="/signup" />
-            )
-          }
+          element={userData?.role === "educator" ? <EditLecture /> : <Navigate to="/signup" />}
         />
         <Route
           path="/course/:courseId"

@@ -4,7 +4,7 @@ import { IoEyeOutline, IoEyeOffSharp } from "react-icons/io5";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config/api.js";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { useDispatch } from "react-redux";
@@ -309,7 +309,6 @@ export function SignUp() {
             </button>
           </div>
 
-          
           <button
             type="submit"
             className="w-full max-w-[350px] bg-blue-500 h-[44px] text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 cursor-pointer transition-colors flex items-center justify-center font-medium text-sm sm:text-base"
