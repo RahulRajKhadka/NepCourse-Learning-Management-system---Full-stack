@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://nepcourse-learning-management-system-7zk8.onrender.com",
+    origin: "https://nepcourse-learning-management-system-0cwc.onrender.com",
     credentials: true,
   }),
 );
