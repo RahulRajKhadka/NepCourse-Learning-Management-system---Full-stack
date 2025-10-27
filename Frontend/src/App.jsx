@@ -3,7 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
-export const serverUrl = "http://localhost:8000";
+export const serverUrl =
+  "https://nepcourse-learning-management-system-u2dy.onrender.com";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
@@ -62,7 +63,7 @@ export const App = () => {
           element={userData ? <AllCourses /> : <Navigate to="/signup" />}
         />
         <Route path="/Dashboard" element={<Dashboard />} />
-    
+
         <Route
           path="/create"
           element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
@@ -81,7 +82,13 @@ export const App = () => {
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
-          element={userData ?.role === "educator" ? <EditLecture /> : <Navigate to="/signup" />}
+          element={
+            userData?.role === "educator" ? (
+              <EditLecture />
+            ) : (
+              <Navigate to="/signup" />
+            )
+          }
         />
         <Route
           path="/course/:courseId"
