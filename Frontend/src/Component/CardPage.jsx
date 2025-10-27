@@ -14,7 +14,6 @@ const CardPage = () => {
     console.log("Published courses in CardPage:", publishedCourses);
   }, [publishedCourses]);
 
-  // Sort courses by reviews/ratings (highest first)
   const sortedCourses = useMemo(() => {
     if (!publishedCourses || publishedCourses.length === 0) return [];
 
@@ -52,20 +51,18 @@ const CardPage = () => {
   const displayCourses = sortedCourses.slice(0, 12);
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 flex flex-col items-center justify-start">
-      {/* Header Section */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mt-6 sm:mt-8 md:mt-10">
+    <div className="w-full min-h-screen flex flex-col items-center justify-start">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl text-white sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mt-6 sm:mt-8 md:mt-10">
           Popular Courses
         </h1>
-        <p className="text-sm sm:text-base md:text-lg text-gray-600 text-center mt-3 sm:mt-4 max-w-4xl mx-auto px-4">
+        <p className="text-sm  text-white sm:text-base md:text-lg text-gray-600 text-center mt-3 sm:mt-4 max-w-4xl mx-auto px-4">
           Explore our highest-rated and most popular courses
         </p>
 
-        {/* Courses Grid */}
-        <div className="w-full grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 py-6 sm:py-8 md:py-10">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-10">
           {loading ? (
-            <div className="col-span-full text-center text-gray-500 text-base sm:text-lg py-8 sm:py-12">
+            <div className="col-span-full text-center text-gray-500 text-lg py-12">
               Loading courses...
             </div>
           ) : displayCourses && displayCourses.length > 0 ? (
@@ -84,9 +81,9 @@ const CardPage = () => {
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-500 text-base sm:text-lg flex flex-col items-center gap-3 sm:gap-4 py-8 sm:py-12">
+            <div className="col-span-full text-center text-gray-500 flex flex-col items-center gap-3 py-12">
               <svg
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-300"
+                className="w-20 h-20 text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -98,10 +95,8 @@ const CardPage = () => {
                   d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                 />
               </svg>
-              <p className="text-lg sm:text-xl md:text-2xl">
-                No courses available yet
-              </p>
-              <p className="text-xs sm:text-sm text-gray-400 max-w-md">
+              <p className="text-xl">No courses available yet</p>
+              <p className="text-sm text-gray-400 max-w-md">
                 Check back soon for new courses
               </p>
             </div>

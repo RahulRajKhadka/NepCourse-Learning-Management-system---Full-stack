@@ -255,6 +255,7 @@ export const verifyOTP = async (req, res) => {
 // ===========================================================
 // 5. ======== GOOGLE AUTHENTICATION ========
 // ===========================================================
+
 export const googleAuth = async (req, res) => {
   try {
     const { name, email, photoUrl, role = "student" } = req.body;
@@ -309,8 +310,7 @@ export const googleAuth = async (req, res) => {
     }
 
     const token = genToken(user._id);
-    
-    // Set cookie with production-ready settings
+
     res.cookie("token", token, getCookieOptions());
 
     const userData = {
@@ -346,11 +346,9 @@ export const googleAuth = async (req, res) => {
         .status(400)
         .json({ success: false, message: messages.join(", ") });
     }
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error during authentication",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error during authentication",
+    });
   }
 };

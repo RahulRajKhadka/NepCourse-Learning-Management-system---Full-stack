@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
+export const serverUrl = "http://localhost:8000";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
@@ -27,9 +28,6 @@ import MyCourses from "./pages/MyEnrolledCourses.jsx";
 import ViewLecture from "./pages/ViewLecture.jsx";
 import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
 import SearchWithAi from "./pages/SearchwithAi.jsx";
-
-// Import api config to initialize axios defaults
-import './config/api.js';
 
 export const App = () => {
   useGetCurrentUser();
@@ -83,7 +81,7 @@ export const App = () => {
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
-          element={userData?.role === "educator" ? <EditLecture /> : <Navigate to="/signup" />}
+          element={userData ?.role === "educator" ? <EditLecture /> : <Navigate to="/signup" />}
         />
         <Route
           path="/course/:courseId"

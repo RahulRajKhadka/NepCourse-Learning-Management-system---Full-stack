@@ -34,28 +34,29 @@ function About() {
             <TfiLayoutLineSolid className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight sm:leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl  text-white font-bold leading-tight sm:leading-tight">
             We Are Maximize Your Learning Growth
           </h2>
 
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed text-justify">
+          <p className="text-sm  sm:text-base md:text-lg text-white leading-relaxed text-justify">
             We provide a modern Learning Management System to simplify online
             education, track progress, and enhance student-instructor
             collaboration efficiently.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2 w-full text-sm sm:text-base font-medium">
-            <div className="flex items-center gap-2">
-              <FaBrain className="text-blue-600" /> Simplified Learning
+            <div className="flex items-center gap-2 ">
+              <FaBrain className="text-blue-600" /> <span className="text-white">Simplified Learning</span>
+            
             </div>
             <div className="flex items-center gap-2">
-              <FaChalkboardTeacher className="text-blue-600" /> Expert Trainers
+              <FaChalkboardTeacher className="text-blue-600" /> <span className="text-white">Expert Trainers</span>
             </div>
             <div className="flex items-center gap-2">
-              <FaUserGraduate className="text-blue-600" /> Big Experience
+              <FaUserGraduate className="text-blue-600" /> <span className="text-white">Big Experience</span>
             </div>
             <div className="flex items-center gap-2">
-              <FaInfinity className="text-blue-600" /> Lifetime Access
+              <FaInfinity className="text-blue-600" /> <span className="text-white">Lifetime Access</span>
             </div>
           </div>
 

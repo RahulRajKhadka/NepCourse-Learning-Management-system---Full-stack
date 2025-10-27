@@ -58,60 +58,42 @@ function Card({
 
   return (
     <div
-      className="
-        group relative max-w-sm w-full bg-white rounded-xl
-        shadow-sm hover:shadow-2xl 
-        transition-all duration-500 overflow-hidden 
-        border border-gray-100 hover:border-blue-300
-        cursor-pointer transform hover:-translate-y-2
-      "
+      className="max-w-sm w-full bg-white rounded-xl shadow border border-gray-200 cursor-pointer"
       onClick={() => navigate(`/course/${id}`)}
     >
-      {/* Thumbnail with Overlay */}
-      <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+      {/* Thumbnail */}
+      <div className="relative h-48 w-full overflow-hidden bg-gray-100">
         <img
           src={imageSrc}
           alt={title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover"
           onError={() => setImageSrc(img)}
-          loading="lazy"
         />
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-        {/* Category Badge - Top Left */}
+        {/* Category Badge */}
         <div className="absolute top-3 left-3">
           <span
-            className={`
-              inline-flex items-center px-3 py-1.5 text-xs font-semibold 
-              rounded-lg border backdrop-blur-sm bg-white/90
-              ${getCategoryColor(category)}
-              shadow-sm
-            `}
+            className={`px-3 py-1 text-xs font-semibold rounded-lg border ${getCategoryColor(
+              category
+            )}`}
           >
             {category || "General"}
           </span>
         </div>
 
-        {/* Level Badge - Top Right */}
+        {/* Level Badge */}
         <div className="absolute top-3 right-3">
           <span
-            className={`
-              inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold 
-              rounded-lg border backdrop-blur-sm bg-white/90
-              ${levelBadge.color}
-              shadow-sm
-            `}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border ${levelBadge.color}`}
           >
             <span>{levelBadge.icon}</span>
             <span>{level || "All Levels"}</span>
           </span>
         </div>
 
-        {/* Price Badge - Bottom Right */}
-        <div className="absolute bottom-3 right-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-          <div className="bg-white rounded-lg px-3 py-2 shadow-lg">
+        {/* Price */}
+        <div className="absolute bottom-3 right-3">
+          <div className="bg-white rounded-lg px-3 py-2 shadow">
             <p className="text-lg font-bold text-blue-600">
               {price === 0 || !price ? "Free" : `₹${price}`}
             </p>
@@ -122,21 +104,18 @@ function Card({
       {/* Content */}
       <div className="p-5 space-y-3">
         {/* Title */}
-        <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors duration-300">
+        <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+        <p className="text-gray-600 text-sm line-clamp-2">
           {description ||
             "Discover amazing content and enhance your learning journey with this course."}
         </p>
 
-        {/* Divider */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-
-        {/* Stats Row */}
-        <div className="flex items-center justify-between text-sm">
+        {/* Stats */}
+        <div className="flex items-center justify-between text-sm text-gray-600">
           {/* Rating */}
           <div className="flex items-center gap-1.5">
             <div className="flex items-center">
@@ -191,12 +170,13 @@ function Card({
           </div>
         )}
 
-        {/* CTA Button - Appears on Hover */}
-        <div className="pt-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-          <button className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg">
-            View Course Details
-          </button>
-        </div>
+        {/* View Course Button */}
+        <button
+          className="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow"
+          onClick={() => navigate(`/course/${id}`)}
+        >
+          View Course Details
+        </button>
       </div>
     </div>
   );

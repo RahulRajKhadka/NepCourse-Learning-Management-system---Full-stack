@@ -12,21 +12,18 @@ import reviewRouter from "./Routes/reviewRoute.js";
 import dashboardRouter from "./Routes/dashboardRoutes.js";
 
 dotenv.config();
+
 const port = process.env.PORT || 8000;
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-
-// CORS Configuration
 app.use(
   cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      "https://nepcourse-learning-management-system-0cwc.onrender.com",
+    origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 // Routes
