@@ -5,7 +5,7 @@ import { RiMicAiFill } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { serverUrl } from "../App.jsx";
+import { serverUrl } from "../config.js";
 import Card from "../Component/Card.jsx";
 import start from "../assets/start.mp3";
 

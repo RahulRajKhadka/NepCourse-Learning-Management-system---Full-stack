@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaStar, FaRegStar, FaUserCircle, FaEdit, FaTrash } from 'react-icons/fa';
-import { serverUrl } from '../App';
+import { serverUrl } from '../config.js';
 import axios from 'axios';
 
 const ReviewsSection = ({ courseId, isEnrolled }) => {

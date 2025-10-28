@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FiUser, FiUpload } from "react-icons/fi";
 import { setUserData } from "../redux/userSlice.jsx";
-import { serverUrl } from "../App.jsx";
+import { serverUrl } from "../config.js";
 
 const EditProfile = () => {
   const { userData } = useSelector((state) => state.user);

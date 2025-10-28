@@ -5,7 +5,7 @@ import { FaEdit } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config.js";
 import { setCreatorCourses } from "../../redux/courseSlice.jsx";
 
 const Courses = () => {

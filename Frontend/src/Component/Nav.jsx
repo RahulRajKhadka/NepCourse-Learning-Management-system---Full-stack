@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import logo from "/public/logoo.png";
 import { HiMenu, HiX } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";

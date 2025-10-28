@@ -10,7 +10,7 @@ import { setUserData } from "../redux/userSlice";
 import { auth, provider } from "../../utils/firebase.js";
 import { signInWithPopup } from "firebase/auth";
 
-const serverUrl = "http://localhost:8000"; // Temporary for demo
+import { serverUrl } from "../config.js";
 
 export function SignUp() {
   const [show, setShow] = useState(false);

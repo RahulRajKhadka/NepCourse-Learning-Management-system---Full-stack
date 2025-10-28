@@ -7,7 +7,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import logo from "/public/logoo.png";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 import { auth, provider } from "../../utils/firebase.js";
 import { signInWithPopup } from "firebase/auth";
 

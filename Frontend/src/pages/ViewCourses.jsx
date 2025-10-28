@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setSelectedCourse } from "../redux/courseSlice";
 import { useEffect, useState, useCallback } from "react";
 import img from "../assets/empty.jpg";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 import axios from "axios";
 import Card from "../Component/Card.jsx";
 import useScrollToTop from "../Component/UseScrollTop.jsx";

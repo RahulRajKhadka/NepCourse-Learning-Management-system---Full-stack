@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners"; // Add this import
-import { serverUrl } from "../App.jsx";
+import { serverUrl } from "../config.js";
 import axios from "axios";
 
 function ForgetPassword() {

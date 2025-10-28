@@ -10,7 +10,7 @@ import {
   FaPlay,
 } from "react-icons/fa";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 
 const MyEnrolledCourse = () => {
   const { userData } = useSelector((state) => state.user);

@@ -3,7 +3,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
 import img from "../../assets/empty.jpg";
 import axios from "axios";
-import { serverUrl } from "../../App.jsx";
+import { serverUrl } from "../../config.js";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";

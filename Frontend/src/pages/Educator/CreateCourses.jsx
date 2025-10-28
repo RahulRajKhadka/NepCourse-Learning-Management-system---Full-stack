@@ -2,7 +2,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { serverUrl } from "../../App.jsx";
+import { serverUrl } from "../../config.js";
 import { ClipLoader } from "react-spinners";
 import { useState } from "react";
 import { useSelector } from "react-redux";
