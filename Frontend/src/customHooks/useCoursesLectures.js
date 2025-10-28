@@ -1,6 +1,6 @@
 // hooks/useCourseLectures.js
 import { useEffect } from "react";
-import { serverUrl } from "../App.jsx";
+import { serverUrl } from "../config.js";
 import { useDispatch, useSelector } from "react-redux";
 import { setAllLectures, setLoading } from "../redux/lectureSlice.jsx";
 import axios from "axios";

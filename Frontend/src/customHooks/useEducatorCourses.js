@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { serverUrl } from "../App.jsx";
+import { serverUrl } from "../config.js";
 import { useDispatch, useSelector } from "react-redux";
 import { setCreatorCourses, setLoading } from "../redux/courseSlice.jsx";
 import axios from "axios";
@@ -18,7 +18,6 @@ const useEducatorCourses = () => {
         dispatch(setLoading(true));
         console.log("Fetching educator courses...");
 
-       
         const result = await axios.get(
           serverUrl + "/api/courses/getCreatorCourse",
           {
@@ -32,7 +31,6 @@ const useEducatorCourses = () => {
         console.log("Educator courses fetched:", result.data);
 
         if (result.data.success) {
-       
           dispatch(setCreatorCourses(result.data.courses));
 
           const published = result.data.courses.filter(

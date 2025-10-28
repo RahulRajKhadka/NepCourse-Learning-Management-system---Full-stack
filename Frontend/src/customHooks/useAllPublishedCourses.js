@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 import { setPublishedCourses, setLoading } from "../redux/courseSlice";
 
 const useAllPublishedCourses = () => {

@@ -16,17 +16,28 @@ dotenv.config();
 const port = process.env.PORT || 8000;
 const app = express();
 
-// Middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+];
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  }),
+  })
 );
 
-// Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/courses", courseRouter);
@@ -36,7 +47,24 @@ app.use("/api/review", reviewRouter);
 app.use("/api/dashboard", dashboardRouter);
 
 app.get("/", (req, res) => {
-  res.send("Hello from the server");
+  res.json({ 
+    message: "NepCourse Backend API is running",
+    status: "success",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "healthy" });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    success: false,
+    message: "Something went wrong!",
+    error: process.env.NODE_ENV === "production" ? {} : err.message
+  });
 });
 
 app.listen(port, () => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config.js";
 import { useDispatch } from "react-redux";
 import { setCreatorCourses } from "../redux/courseSlice";
 import { useSelector } from "react-redux";
