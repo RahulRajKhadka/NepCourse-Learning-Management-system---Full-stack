@@ -19,20 +19,23 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const dispatch = useDispatch();
-  
+
   // Add this to debug Redux state
   const userData = useSelector((state) => state.user.userData);
-  
+
   useEffect(() => {
-    console.log('Login component - Current userData:', userData);
+    console.log("Login component - Current userData:", userData);
     // If already logged in, redirect to home
     if (userData && Object.keys(userData).length > 0) {
-      navigate('/');
+      navigate("/");
     }
   }, [userData, navigate]);
-
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
+
+    console.log("=== LOGIN ATTEMPT STARTED ===");
+    console.log("Email:", email);
+    console.log("Password length:", password.length);
 
     // Validation
     if (!email.trim() || !password.trim()) {
@@ -47,73 +50,88 @@ export const Login = () => {
 
     setLoading(true);
     try {
-      console.log("Attempting login with:", {
+      const loginData = {
         email: email.trim().toLowerCase(),
+        password: password.trim(),
+      };
+
+      console.log("Sending login request to:", `${serverUrl}/api/auth/login`);
+      console.log("With data:", {
+        email: loginData.email,
+        passwordLength: loginData.password.length,
       });
 
       const result = await axios.post(
         `${serverUrl}/api/auth/login`,
-        {
-          email: email.trim().toLowerCase(),
-          password: password.trim(),
-        },
+        loginData,
         {
           withCredentials: true,
-          timeout: 6000,
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
 
-      console.log("Full login response:", result.data);
+      console.log("=== LOGIN SUCCESS ===");
+      console.log("Full response:", result);
+      console.log("Response data:", result.data);
+      console.log("User data:", result.data.user);
 
-      // Store the user data - try both possible structures
-      let userData;
       if (result.data.user) {
-        userData = result.data.user;
-      } else if (result.data.data && result.data.data.user) {
-        userData = result.data.data.user;
+        console.log("Dispatching user data to Redux:", result.data.user);
+        dispatch(setUserData(result.data.user));
+
+        toast.success(result.data.message || "Login successful!");
+        console.log("Navigating to home...");
+        navigate("/");
       } else {
-        // If the entire response is the user data
-        userData = result.data;
+        console.error("No user data in response!");
+        throw new Error("Invalid response from server");
       }
-
-      console.log("Extracted userData:", userData);
-      dispatch(setUserData(userData));
-
-      toast.success("Login successful!");
-      navigate("/");
-
     } catch (error) {
-      console.error("Login error:", error);
-      console.error("Error response:", error.response?.data);
+      console.error("=== LOGIN FAILED ===");
+      console.error("Error object:", error);
+      console.error("Error response:", error.response);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error status:", error.response?.status);
 
-      if (error.code === "ECONNABORTED") {
-        toast.error("Request timeout. Please try again.");
-      } else if (error.response?.status === 404) {
-        toast.error("User not found. Please check your email or sign up.");
-      } else if (error.response?.status === 400) {
-        toast.error(error.response.data.message || "Invalid email or password");
-      } else if (error.response?.status === 401) {
-        toast.error("Invalid credentials. Please check your email and password.");
-      } else if (error.response?.status === 500) {
-        console.error("Server error details:", error.response.data);
-        toast.error("Server error. Please try again later.");
-      } else if (!error.response) {
-        toast.error("Network error. Please check your connection and ensure the server is running.");
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message || error.response.data;
+
+        console.error(`Error ${status}:`, message);
+
+        switch (status) {
+          case 400:
+            toast.error(message || "Invalid email or password");
+            break;
+          case 404:
+            toast.error("User not found. Please sign up first.");
+            break;
+          case 500:
+            toast.error("Server error. Please try again later.");
+            console.error("Server error details:", error.response.data);
+            break;
+          default:
+            toast.error(message || "Login failed. Please try again.");
+        }
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        toast.error("Network error. Please check your connection.");
       } else {
-        toast.error(error.response?.data?.message || "Login failed. Please try again.");
+        console.error("Request setup error:", error.message);
+        toast.error("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
+      console.log("=== LOGIN ATTEMPT ENDED ===");
     }
   };
 
   // ✅ ADD THIS NEW GOOGLE SIGN-IN FUNCTION
   const googleSignIn = async () => {
     console.log("🔵 Google Sign-In button CLICKED!");
-    
+
     if (googleLoading) {
       console.log("⚠️ Already loading, exiting...");
       return;
@@ -127,13 +145,13 @@ export const Login = () => {
       console.log("🔵 Opening Firebase popup...");
       const response = await signInWithPopup(auth, provider);
       console.log("✅ Firebase popup completed!");
-      
+
       const user = response.user;
       console.log("✅ Firebase user received:", {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
-        uid: user.uid
+        uid: user.uid,
       });
 
       const requestData = {
@@ -147,9 +165,9 @@ export const Login = () => {
       const result = await axios.post(
         serverUrl + "/api/auth/googleauth",
         requestData,
-        { 
+        {
           withCredentials: true,
-          timeout: 10000
+          timeout: 10000,
         }
       );
 
@@ -157,10 +175,10 @@ export const Login = () => {
 
       if (result.data.success && result.data.user) {
         console.log("✅ Authentication successful!");
-        
+
         dispatch(setUserData(result.data.user));
         toast.success(result.data.message || "Google Sign-In Successful");
-        
+
         console.log("✅ Navigating to home...");
         navigate("/");
       } else {
@@ -201,7 +219,7 @@ export const Login = () => {
         password: "password123",
       },
       educator: {
-        email: "educator@demo.com", 
+        email: "educator@demo.com",
         password: "password123",
       },
     };
@@ -234,7 +252,10 @@ export const Login = () => {
 
           {/* Email Input */}
           <div className="w-full max-w-md">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email
             </label>
             <input
@@ -253,7 +274,10 @@ export const Login = () => {
 
           {/* Password Input */}
           <div className="w-full max-w-md relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password
             </label>
             <input
@@ -314,7 +338,10 @@ export const Login = () => {
             )}
           </button>
 
-          <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm underline mt-2">
+          <Link
+            to="/forgot-password"
+            className="text-blue-600 hover:text-blue-800 text-sm underline mt-2"
+          >
             Forgot Password?
           </Link>
 
@@ -330,8 +357,8 @@ export const Login = () => {
             className="flex items-center justify-center w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all disabled:opacity-50 cursor-pointer"
             disabled={loading || googleLoading}
             onClick={googleSignIn}
-            style={{ 
-              cursor: (loading || googleLoading) ? 'not-allowed' : 'pointer'
+            style={{
+              cursor: loading || googleLoading ? "not-allowed" : "pointer",
             }}
           >
             {googleLoading ? (
@@ -341,15 +368,24 @@ export const Login = () => {
               </>
             ) : (
               <>
-                <img className="w-5 h-5 mr-3" src="https://www.google.com/favicon.ico" alt="Google logo" />
-                <span className="text-gray-700 font-medium">Sign in with Google</span>
+                <img
+                  className="w-5 h-5 mr-3"
+                  src="https://www.google.com/favicon.ico"
+                  alt="Google logo"
+                />
+                <span className="text-gray-700 font-medium">
+                  Sign in with Google
+                </span>
               </>
             )}
           </button>
 
           <div className="text-gray-600 text-sm mt-4">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-blue-600 hover:text-blue-800 underline">
+            <Link
+              to="/signup"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
               Sign Up
             </Link>
           </div>
@@ -357,9 +393,17 @@ export const Login = () => {
 
         {/* Right side - Branding */}
         <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 rounded-r-2xl flex-col items-center justify-center gap-6 p-8">
-          <img src={logo} alt="NEP Courses Logo" className="w-4/5 max-w-xs rounded-2xl shadow-2xl" />
-          <h1 className="text-2xl font-bold text-white text-center">WELCOME TO NEPCOURSES</h1>
-          <p className="text-blue-100 text-center">Your gateway to quality education and learning opportunities</p>
+          <img
+            src={logo}
+            alt="NEP Courses Logo"
+            className="w-4/5 max-w-xs rounded-2xl shadow-2xl"
+          />
+          <h1 className="text-2xl font-bold text-white text-center">
+            WELCOME TO NEPCOURSES
+          </h1>
+          <p className="text-blue-100 text-center">
+            Your gateway to quality education and learning opportunities
+          </p>
         </div>
       </form>
     </div>

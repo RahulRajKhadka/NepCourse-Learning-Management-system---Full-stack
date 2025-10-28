@@ -28,7 +28,7 @@ export const Home = () => {
           </div>
 
           {/* Hero Content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 z-10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 ">
             {/* Main Heading with Animation */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white font-black text-center tracking-wide mb-2 sm:mb-3 lg:mb-4 animate-fade-in-up">
               <span className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
