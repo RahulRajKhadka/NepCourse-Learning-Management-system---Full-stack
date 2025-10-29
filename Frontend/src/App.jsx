@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
@@ -34,6 +34,29 @@ export const App = () => {
   GetCreatorCourses();
   usePublishedCourses();
   const { userData } = useSelector((state) => state.user);
+
+  // Add loading state for authentication check
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  
+  useEffect(() => {
+    // Give time for auth to load on initial mount and refresh
+    const timer = setTimeout(() => {
+      setIsAuthChecking(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [userData]);
+  
+  // Show loading screen while checking authentication
+  if (isAuthChecking) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
