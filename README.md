@@ -1,386 +1,169 @@
-<<<<<<< HEAD
-# NepCourses — Learning Management System
-=======
-<<<<<<< HEAD
 # 🎓 NepCourses - Learning Management System
->>>>>>> 03a4dcf (fixed the rotue)
 
-Monorepo containing Backend (Node.js + Express + MongoDB) and Frontend (React + Vite + Redux + Tailwind + Firebase).  
-This README explains how to set up and run both projects, environment variables, key endpoints, payment flows (eSewa / Khalti), and troubleshooting.
+A full-stack **Learning Management System (LMS)** built with the **MERN stack**, enabling educators to create and manage courses while students can discover, purchase, and learn from quality content.
 
 ---
 
-## Repository layout
-- `NepCourses/Backend` — Express API, MongoDB models, payment controllers, auth, transactions
-- `NepCourses/Frontend` — React (Vite) app, Redux slices, Tailwind, Firebase auth
+## 🌟 Features
+
+### 👨‍🏫 For Educators / Creators
+- ✅ Create and publish courses  
+- ✅ Upload and manage video lectures  
+- ✅ Edit course details and pricing  
+- ✅ Track enrollments and revenue  
+- ✅ Dashboard analytics  
+
+### 🎓 For Students
+- ✅ Browse and explore courses  
+- ✅ Purchase via **eSewa** or **Khalti**  
+- ✅ Access enrolled courses and video lectures  
+- ✅ Write reviews and rate courses  
+- ✅ Track learning progress  
+
+### ⚙️ General Features
+- ✅ User authentication (Email/Password + Google OAuth)  
+- ✅ Secure payment integration (eSewa & Khalti)  
+- ✅ Cloud-based video and file storage (Cloudinary)  
+- ✅ Responsive design (Tailwind CSS)  
+- ✅ Email notifications  
+- ✅ AI-powered features (Gemini API integration)
 
 ---
 
-## Prerequisites
-- Node.js (v16+)
-- npm or yarn
-- MongoDB (Atlas or local)
-- (Optional) Firebase project for Google Sign-In
+## 🚀 Tech Stack
+
+### 🖥️ Frontend
+- React.js  
+- Redux  
+- React Router  
+- Tailwind CSS  
+- Firebase (Google OAuth)  
+- Vite  
+
+### 🧠 Backend
+- Node.js  
+- Express.js  
+- MongoDB  
+- Mongoose  
+- JWT Authentication  
+- Cloudinary (Media Storage)  
+- Multer (File Upload Handling)  
+
+### 💳 Payment Gateways
+- eSewa  
+- Khalti  
 
 ---
 
-## Quick start (Windows)
+## 🛠️ Installation & Setup
 
-Backend:
-```powershell
-cd "c:\Users\Rahul Raj Khadka\Desktop\Major projects\NepCourses\Backend"
-npm install
-npm run dev   # or npm start
-```
+### 📋 Prerequisites
+- Node.js (v14 or higher)  
+- MongoDB (local or Atlas)  
+- npm or yarn  
+- Cloudinary account  
+- eSewa merchant account (for production)  
+- Khalti merchant account (for production)  
+- Google Firebase project (for OAuth)
 
-Frontend:
-```powershell
-cd "c:\Users\Rahul Raj Khadka\Desktop\Major projects\NepCourses\Frontend"
-npm install
+---
+
+### ⚙️ Backend Setup
+
+1. Clone the repository  
+   ```bash
+   git clone <repository-url>
+   cd NepCourses/Backend
+
+   npm install
+   npm start
+
+   
+# or for development
 npm run dev
-```
 
-Make sure backend port and `serverUrl` in frontend match (default backend port 8000).
-
----
-
-## Backend — Setup & env
-
-Create `Backend/.env` (DO NOT COMMIT secrets). Example keys used in the codebase:
-
-```
-PORT=8000
-NODE_ENV=development
-MONGODB_URL=<your_mongo_connection_string>
-JWT_SECRET=<jwt_secret>
-
-# Gmail (for OTP / emails)
-GMAIL_USER=<email>
-GMAIL_PASS=<app_password>
-
-# Firebase Admin (if used)
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-
-# eSewa (test/prod)
-ESEWA_MERCHANT_ID=EPAYTEST
-ESEWA_SECRET=<esewa_secret>
-ESEWA_PAYMENT_URL=https://rc-epay.esewa.com.np/api/epay/main/v2/form
-ESEWA_PAYMENT_STATUS_CHECK_URL=https://rc.esewa.com.np/api/epay/transaction/status/
-
-# Khalti
-KHALTI_PUBLIC_KEY=<khalti_public_key>
-KHALTI_SECRET_KEY=<khalti_secret_key>
-KHALTI_PAYMENT_URL=https://a.khalti.com/api/v2/epayment/initiate/
-KHALTI_VERIFICATION_URL=https://a.khalti.com/api/v2/epayment/lookup/
-
-# Frontend callback URLs
-SUCCESS_URL=http://localhost:5173/payment-success
-FAILURE_URL=http://localhost:5173/payment-failure
-```
-
-Important:
-- Initialize Firebase Admin in backend if verifying Google idTokens.
-- Enable CORS with credentials for frontend origin.
-
----
-
-## Frontend — Setup & env
-
-Create `Frontend/.env` (Vite env use `VITE_` prefix):
-
-```
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
-
-Also confirm `serverUrl` export in `Frontend/src/App.jsx`:
-```js
-export const serverUrl = "http://localhost:8000";
-```
-Import `serverUrl` where API requests are made.
-
----
-
-## Key backend routes (examples)
-
-Auth
-- POST `/api/auth/signup`
-- POST `/api/auth/login`
-- POST `/api/auth/googleauth` — expects Google idToken from frontend (verify with Firebase Admin)
-- GET `/api/auth/logout`
-
-User
-- GET `/api/user/getcurrentuser` — returns current user (cookie/session/auth required)
-
-Courses
-- GET `/api/courses/published` (or similar)
-- GET `/api/courses/:id`
-
-Payments
-- POST `/api/payment/initiate-esewa` or `/api/payment/initiate-khalti` (or combined `initiate-payment`)
-- POST `/api/payment/payment-status` — verify and update transaction status
-- GET `/api/payment/esewa-success` and `/api/payment/esewa-failure` (optional server endpoints)
-
-Transaction model:
-- Save transactions with fields: customerDetails, product_id, amount, payment_gateway, status, gateway response, timestamps.
-
----
-
-## Frontend flows
-
-- Google Sign-In: obtain `idToken` on frontend (Firebase auth) and send to backend:
-  ```js
-  const idToken = await user.getIdToken();
-  axios.post(`${serverUrl}/api/auth/googleauth`, { idToken, name, email }, { withCredentials: true })
-  ```
-  Backend must verify token using Firebase Admin before creating session/user.
-
-- Free course enrollment:
-  - If `course.price === 0`, dispatch Redux action to add course to enrolled list and optionally persist to backend.
-  - Change button text to "Watch Now" when enrolled.
-
-- Payment (eSewa):
-  - Frontend requests initiation endpoint -> backend returns `paymentUrl` & `paymentData`.
-  - Frontend programmatically creates a POST form and submits to eSewa.
-  - eSewa redirects to `SUCCESS_URL` or `FAILURE_URL`. Frontend then calls backend to verify and finalize transaction.
-
-- Payment (Khalti):
-  - Recommended: use Khalti JS SDK on frontend for checkout; verify `pidx` on backend.
-
----
-
-## Success & Failure pages
-- Add routes `/payment-success` and `/payment-failure` in Frontend.
-- On success page, verify payment with backend (`/api/payment/payment-status`) using `product_id` or `pidx`. Update transaction and enroll user.
-
----
-
-## Troubleshooting
-
-1. Axios Network Error / ERR_CONNECTION_REFUSED
-   - Ensure backend running and port matches `serverUrl`.
-   - Test `http://localhost:8000/` or the API route in browser/Postman.
-
-<<<<<<< HEAD
-=======
-=======
-# NepCourses — Learning Management System
-
-Monorepo containing Backend (Node.js + Express + MongoDB) and Frontend (React + Vite + Redux + Tailwind + Firebase).  
-This README explains how to set up and run both projects, environment variables, key endpoints, payment flows (eSewa / Khalti), and troubleshooting.
-
----
-
-## Repository layout
-- `NepCourses/Backend` — Express API, MongoDB models, payment controllers, auth, transactions
-- `NepCourses/Frontend` — React (Vite) app, Redux slices, Tailwind, Firebase auth
-
----
-
-## Prerequisites
-- Node.js (v16+)
-- npm or yarn
-- MongoDB (Atlas or local)
-- (Optional) Firebase project for Google Sign-In
-
----
-
-## Quick start (Windows)
-
-Backend:
-```powershell
-cd "c:\Users\Rahul Raj Khadka\Desktop\Major projects\NepCourses\Backend"
+cd ../Frontend
 npm install
-npm run dev   # or npm start
-```
 
-Frontend:
-```powershell
-cd "c:\Users\Rahul Raj Khadka\Desktop\Major projects\NepCourses\Frontend"
-npm install
 npm run dev
-```
+Frontend will run on http://localhost:5173
+Database Models
 
-Make sure backend port and `serverUrl` in frontend match (default backend port 8000).
+User - Authentication & profile info
 
----
+Course - Course details & metadata
 
-## Backend — Setup & env
+Lecture - Video lectures within a course
 
-Create `Backend/.env` (DO NOT COMMIT secrets). Example keys used in the codebase:
+Enrollment - Student course enrollments
 
-```
-PORT=8000
-NODE_ENV=development
-MONGODB_URL=<your_mongo_connection_string>
-JWT_SECRET=<jwt_secret>
+Payment - Transaction records
 
-# Gmail (for OTP / emails)
-GMAIL_USER=<email>
-GMAIL_PASS=<app_password>
+Review - Course reviews & ratings
 
-# Firebase Admin (if used)
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+🔐 Authentication
 
-# eSewa (test/prod)
-ESEWA_MERCHANT_ID=EPAYTEST
-ESEWA_SECRET=<esewa_secret>
-ESEWA_PAYMENT_URL=https://rc-epay.esewa.com.np/api/epay/main/v2/form
-ESEWA_PAYMENT_STATUS_CHECK_URL=https://rc.esewa.com.np/api/epay/transaction/status/
+The system supports:
 
-# Khalti
-KHALTI_PUBLIC_KEY=<khalti_public_key>
-KHALTI_SECRET_KEY=<khalti_secret_key>
-KHALTI_PAYMENT_URL=https://a.khalti.com/api/v2/epayment/initiate/
-KHALTI_VERIFICATION_URL=https://a.khalti.com/api/v2/epayment/lookup/
+Email/Password login (JWT based)
 
-# Frontend callback URLs
-SUCCESS_URL=http://localhost:5173/payment-success
-FAILURE_URL=http://localhost:5173/payment-failure
-```
+Google OAuth (via Firebase)
 
-Important:
-- Initialize Firebase Admin in backend if verifying Google idTokens.
-- Enable CORS with credentials for frontend origin.
+💳 Payment Integration
+Supported Payment Gateways
 
----
+eSewa - Popular Nepali payment gateway
 
-## Frontend — Setup & env
+Khalti - Digital wallet payment system
 
-Create `Frontend/.env` (Vite env use `VITE_` prefix):
+💡 Payment Flow
 
-```
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
+User selects a course
 
-Also confirm `serverUrl` export in `Frontend/src/App.jsx`:
-```js
-export const serverUrl = "http://localhost:8000";
-```
-Import `serverUrl` where API requests are made.
+Chooses eSewa or Khalti
 
----
+Redirected to payment gateway
 
-## Key backend routes (examples)
+Upon success → Enrollment created
 
-Auth
-- POST `/api/auth/signup`
-- POST `/api/auth/login`
-- POST `/api/auth/googleauth` — expects Google idToken from frontend (verify with Firebase Admin)
-- GET `/api/auth/logout`
+User gains access to course content
 
-User
-- GET `/api/user/getcurrentuser` — returns current user (cookie/session/auth required)
+🧪 Test Payment Credentials
+🟢 eSewa Test Account
+eSewa ID: 9806800001 / 2 / 3 / 4 / 5
+Password: Nepal@123
+MPIN: 1122
+Token: 123456
 
-Courses
-- GET `/api/courses/published` (or similar)
-- GET `/api/courses/:id`
+🟣 Khalti Test Accounts
+Test Khalti IDs:
+- 9800000000
+- 9800000001
+- 9800000002
+- 9800000003
+- 9800000004
+- 9800000005
 
-Payments
-- POST `/api/payment/initiate-esewa` or `/api/payment/initiate-khalti` (or combined `initiate-payment`)
-- POST `/api/payment/payment-status` — verify and update transaction status
-- GET `/api/payment/esewa-success` and `/api/payment/esewa-failure` (optional server endpoints)
+Test MPIN: 1111
+Test OTP: 987654
 
-Transaction model:
-- Save transactions with fields: customerDetails, product_id, amount, payment_gateway, status, gateway response, timestamps.
 
----
+⚠️ Note: These credentials are for sandbox testing only.
+Do not use production credentials in code or documentation.
 
-## Frontend flows
+📧 Email Notifications
 
-- Google Sign-In: obtain `idToken` on frontend (Firebase auth) and send to backend:
-  ```js
-  const idToken = await user.getIdToken();
-  axios.post(`${serverUrl}/api/auth/googleauth`, { idToken, name, email }, { withCredentials: true })
-  ```
-  Backend must verify token using Firebase Admin before creating session/user.
+Sent via Gmail SMTP:
 
-- Free course enrollment:
-  - If `course.price === 0`, dispatch Redux action to add course to enrolled list and optionally persist to backend.
-  - Change button text to "Watch Now" when enrolled.
+Account verification
 
-- Payment (eSewa):
-  - Frontend requests initiation endpoint -> backend returns `paymentUrl` & `paymentData`.
-  - Frontend programmatically creates a POST form and submits to eSewa.
-  - eSewa redirects to `SUCCESS_URL` or `FAILURE_URL`. Frontend then calls backend to verify and finalize transaction.
+Password reset
 
-- Payment (Khalti):
-  - Recommended: use Khalti JS SDK on frontend for checkout; verify `pidx` on backend.
+Enrollment confirmation
 
----
+Course update notifications
 
-## Success & Failure pages
-- Add routes `/payment-success` and `/payment-failure` in Frontend.
-- On success page, verify payment with backend (`/api/payment/payment-status`) using `product_id` or `pidx`. Update transaction and enroll user.
 
----
 
-## Troubleshooting
 
-1. Axios Network Error / ERR_CONNECTION_REFUSED
-   - Ensure backend running and port matches `serverUrl`.
-   - Test `http://localhost:8000/` or the API route in browser/Postman.
 
->>>>>>> 03a4dcf (fixed the rotue)
-2. CORS
-   - Enable `cors({ origin: "<frontend-url>", credentials: true })` on backend.
-   - Use `axios` with `{ withCredentials: true }` if using cookies.
-
-3. Firebase Google Sign-In
-   - Frontend: send `idToken` not only email/name.
-   - Backend: verify idToken using Firebase Admin SDK.
-
-4. Asset import errors
-   - Verify folder names (`assets` not `assests`) and relative import path.
-
-5. Payment issues
-   - Check gateway test endpoints, keys in `.env`, and backend logs.
-   - Ensure success/failure URLs match gateway configuration.
-
----
-
-## Developer tips
-
-- Keep secrets out of git; use `.env` and `.gitignore`.
-- Use Postman to debug endpoints.
-- Add server-side request validation (express-validator / Joi).
-- Persist free enrollments to backend to maintain state across devices.
-- Add robust logging around payment initiation & verification.
-
----
-
-## What I validated
-- Backend routes exist for auth, payments and transactions.
-- Frontend has hooks for current user, published courses, and payment page.
-- Payment flow architecture (initiate -> gateway -> verify) implemented for eSewa and Khalti.
-- Redux slices exist for user, course, and enrollment; ensure enrollment persistence on free enrollment.
-
----
-
-## Next steps you can request
-- Generate `Backend/.env.example` and `Frontend/.env.example`.
-- Add sample Firebase Admin init code for backend.
-- Add endpoint to persist free enrollments and update enrolledStudents in Course model.
-- Add unit tests for payment controller and transaction flow.
-
----
-
-<<<<<<< HEAD
-If you want, I will create `Backend/README.md` and `Frontend/README.md` files separately and add `.env.example` files for both folders.
-=======
-If you want, I will create `Backend/README.md` and `Frontend/README.md` files separately and add `.env.example` files for both folders.
->>>>>>> 8651600 (fixed the render url)
->>>>>>> 03a4dcf (fixed the rotue)
