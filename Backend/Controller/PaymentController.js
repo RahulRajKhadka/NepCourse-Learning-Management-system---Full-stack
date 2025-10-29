@@ -4,7 +4,7 @@ dotenv.config();
 import EsewaService from "../utils/esewa.js";
 import axios from "axios";
 import Enrollment from "../Model/Enrollment.js";
-import Course from "../Model/courseModel.js"; 
+import Course from "../Model/courseModel.js";
 
 // Unified initiate endpoint used by frontend
 export const initiateCoursePayment = async (req, res) => {
@@ -30,6 +30,34 @@ export const initiateCoursePayment = async (req, res) => {
     }
 
     if (Number(amount) === 0) {
+      // For free courses, create enrollment immediately
+      try {
+        const userId = req.user?._id;
+        let enrollment = await Enrollment.findOne({
+          user: userId,
+          course: courseId,
+        });
+
+        if (!enrollment) {
+          enrollment = await Enrollment.create({
+            user: userId,
+            course: courseId,
+            enrollmentDate: new Date(),
+            paymentStatus: "completed",
+            paymentMethod: "free",
+            amountPaid: 0,
+            progress: 0,
+            completedLectures: [],
+          });
+
+          await Course.findByIdAndUpdate(courseId, {
+            $inc: { enrollmentCount: 1 },
+          });
+        }
+      } catch (error) {
+        console.error("Error enrolling in free course:", error);
+      }
+
       return res.json({ success: true, enrollmentType: "free" });
     }
 
@@ -70,9 +98,8 @@ export const initiateCoursePayment = async (req, res) => {
           message: "Khalti secret key is not configured (KHALTI_SECRET_KEY).",
         });
       }
-      const authHeader = rawSecretKey.startsWith("Key ")
-        ? rawSecretKey
-        : `Key ${rawSecretKey}`;
+      // Use the key as-is since it already includes "Key " prefix
+      const authHeader = rawSecretKey;
 
       if (Math.round(Number(amount)) < 10) {
         return res.status(400).json({
@@ -83,8 +110,9 @@ export const initiateCoursePayment = async (req, res) => {
 
       const userId = req.user?._id;
       const payload = {
-        return_url: process.env.KHALTI_RETURN_URL || `${serverBaseUrl}/api/payment/khalti-return?courseId=${courseId}&userId=${userId}`,
-
+        return_url:
+          process.env.KHALTI_RETURN_URL ||
+          `${serverBaseUrl}/api/payment/khalti-return?courseId=${courseId}&userId=${userId}`,
         website_url: process.env.CLIENT_URL || "http://localhost:5173",
         amount: Math.round(Number(amount) * 100),
         purchase_order_id: `${courseId}-${userId}-${Date.now()}`,
@@ -125,6 +153,7 @@ export const initiateCoursePayment = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Unsupported paymentGateway" });
   } catch (error) {
+    console.error("Payment initiation error:", error);
     return res.status(500).json({
       success: false,
       message: "Payment initiation failed",
@@ -132,7 +161,6 @@ export const initiateCoursePayment = async (req, res) => {
     });
   }
 };
-
 
 export const renderEsewaFormAndSubmit = (req, res) => {
   const q = req.query;
@@ -164,15 +192,17 @@ export const renderEsewaFormAndSubmit = (req, res) => {
   return res.send(html);
 };
 
-// ✅ FIXED: eSewa Success with Enrollment Creation
+// ✅ eSewa Success with Enrollment Creation
 export const esewaSuccess = async (req, res) => {
   const clientBase = process.env.CLIENT_URL || "http://localhost:5173";
-  
+
   try {
     const encodedData = req.query?.data || req.body?.data;
     const courseId = req.query?.courseId;
     const userId = req.query?.userId;
-    
+
+    console.log("eSewa Success - courseId:", courseId, "userId:", userId);
+
     let transactionUuid;
     let totalAmount;
 
@@ -190,27 +220,24 @@ export const esewaSuccess = async (req, res) => {
     totalAmount = totalAmount || req.query?.total_amount;
 
     if (!transactionUuid || !totalAmount) {
+      console.error("Missing transaction data");
       return res.redirect(302, `${clientBase}/payment-failure`);
     }
 
-    
     const status = await EsewaService.checkPaymentStatus({
       transactionUuid,
       totalAmount,
     });
 
     if (status?.status === "COMPLETE") {
-      
       if (courseId && userId) {
         try {
-          
-          let enrollment = await Enrollment.findOne({ 
-            user: userId, 
-            course: courseId 
+          let enrollment = await Enrollment.findOne({
+            user: userId,
+            course: courseId,
           });
 
           if (!enrollment) {
-            
             enrollment = await Enrollment.create({
               user: userId,
               course: courseId,
@@ -223,27 +250,32 @@ export const esewaSuccess = async (req, res) => {
               completedLectures: [],
             });
 
-           
             await Course.findByIdAndUpdate(courseId, {
-              $inc: { enrollmentCount: 1 }
+              $inc: { enrollmentCount: 1 },
             });
 
-            console.log(" Enrollment created:", enrollment._id);
+            console.log("✅ Enrollment created:", enrollment._id);
           } else {
-            console.log("ℹ User already enrolled");
+            console.log("ℹ️ User already enrolled");
           }
 
-         
-          return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}`);
+          return res.redirect(
+            302,
+            `${clientBase}/payment-success?courseId=${courseId}`,
+          );
         } catch (dbError) {
-          console.error(" Database error:", dbError);
-          return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}&warning=enrollment-failed`);
+          console.error("❌ Database error:", dbError);
+          return res.redirect(
+            302,
+            `${clientBase}/payment-success?courseId=${courseId}&warning=enrollment-failed`,
+          );
         }
       }
-      
+
       return res.redirect(302, `${clientBase}/payment-success`);
     }
-    
+
+    console.error("Payment status not complete:", status?.status);
     return res.redirect(302, `${clientBase}/payment-failure`);
   } catch (err) {
     console.error("eSewa success error:", err);
@@ -253,9 +285,9 @@ export const esewaSuccess = async (req, res) => {
 
 export const esewaFailure = (req, res) => {
   const clientBase = process.env.CLIENT_URL || "http://localhost:5173";
+  console.log("eSewa payment failure");
   return res.redirect(302, `${clientBase}/payment-failure`);
 };
-
 
 export const khaltiReturn = async (req, res) => {
   try {
@@ -264,7 +296,17 @@ export const khaltiReturn = async (req, res) => {
     const courseId = req.query.courseId;
     const userId = req.query.userId;
 
+    console.log(
+      "Khalti Return - pidx:",
+      pidx,
+      "courseId:",
+      courseId,
+      "userId:",
+      userId,
+    );
+
     if (!pidx) {
+      console.error("Missing pidx in Khalti return");
       return res.redirect(302, `${clientBase}/payment-failure`);
     }
 
@@ -279,67 +321,90 @@ export const khaltiReturn = async (req, res) => {
 
     let attempts = 0;
     while (attempts < 6) {
-      const { data } = await axios.post(
-        lookupUrl,
-        { pidx },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: authHeader,
+      try {
+        const { data } = await axios.post(
+          lookupUrl,
+          { pidx },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: authHeader,
+            },
           },
-        }
-      );
+        );
 
-      if (data?.status === "Completed") {
-      
-        if (courseId && userId) {
-          try {
-            let enrollment = await Enrollment.findOne({ 
-              user: userId, 
-              course: courseId 
-            });
+        console.log(
+          "Khalti lookup attempt",
+          attempts + 1,
+          "status:",
+          data?.status,
+        );
 
-            if (!enrollment) {
-              enrollment = await Enrollment.create({
+        if (data?.status === "Completed") {
+          if (courseId && userId) {
+            try {
+              let enrollment = await Enrollment.findOne({
                 user: userId,
                 course: courseId,
-                enrollmentDate: new Date(),
-                paymentStatus: "completed",
-                paymentMethod: "khalti",
-                transactionId: pidx,
-                amountPaid: data.total_amount / 100, // Convert paisa to NPR
-                progress: 0,
-                completedLectures: [],
               });
 
-              await Course.findByIdAndUpdate(courseId, {
-                $inc: { enrollmentCount: 1 }
-              });
+              if (!enrollment) {
+                enrollment = await Enrollment.create({
+                  user: userId,
+                  course: courseId,
+                  enrollmentDate: new Date(),
+                  paymentStatus: "completed",
+                  paymentMethod: "khalti",
+                  transactionId: pidx,
+                  amountPaid: data.total_amount / 100,
+                  progress: 0,
+                  completedLectures: [],
+                });
 
-              console.log("✅ Khalti Enrollment created:", enrollment._id);
+                await Course.findByIdAndUpdate(courseId, {
+                  $inc: { enrollmentCount: 1 },
+                });
+
+                console.log("✅ Khalti Enrollment created:", enrollment._id);
+              }
+
+              return res.redirect(
+                302,
+                `${clientBase}/payment-success?courseId=${courseId}`,
+              );
+            } catch (dbError) {
+              console.error("❌ Database error:", dbError);
+              return res.redirect(
+                302,
+                `${clientBase}/payment-success?courseId=${courseId}&warning=enrollment-failed`,
+              );
             }
-
-            return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}`);
-          } catch (dbError) {
-            console.error("❌ Database error:", dbError);
-            return res.redirect(302, `${clientBase}/payment-success?courseId=${courseId}&warning=enrollment-failed`);
           }
+
+          return res.redirect(302, `${clientBase}/payment-success`);
         }
 
-        return res.redirect(302, `${clientBase}/payment-success`);
+        if (
+          data?.status &&
+          ["User canceled", "Expired", "Refunded"].includes(data.status)
+        ) {
+          console.error("Payment cancelled/expired:", data.status);
+          return res.redirect(302, `${clientBase}/payment-failure`);
+        }
+      } catch (error) {
+        console.error(
+          "Khalti lookup error attempt",
+          attempts + 1,
+          ":",
+          error.message,
+        );
       }
-      
-      if (
-        data?.status &&
-        ["User canceled", "Expired", "Refunded"].includes(data.status)
-      ) {
-        return res.redirect(302, `${clientBase}/payment-failure`);
-      }
-      
+
       await new Promise((r) => setTimeout(r, 2000));
       attempts += 1;
     }
 
+    console.error("Khalti payment verification timeout");
     return res.redirect(302, `${clientBase}/payment-failure`);
   } catch (error) {
     console.error("Khalti return error:", error);

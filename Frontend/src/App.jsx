@@ -1,22 +1,18 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
-import { serverUrl } from "./config.js";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
 import Profile from "./pages/Profile.jsx";
-import { Navigate } from "react-router-dom";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import { Dashboard } from "./pages/Educator/Dashboard.jsx";
 import CreateCourse from "./pages/Educator/CreateCourses.jsx";
 import EditCourse from "./pages/Educator/EditCourses.jsx";
 import Courses from "./pages/Educator/Courses.jsx";
-import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
-import usePublishedCourses from "./customHooks/useAllPublishedCourses.js";
 import AllCourses from "./pages/AllCourses.jsx";
 import CreateLecture from "./pages/Educator/CreateLecture.jsx";
 import EditLecture from "./pages/Educator/EditLecture.jsx";
@@ -28,6 +24,8 @@ import MyCourses from "./pages/MyEnrolledCourses.jsx";
 import ViewLecture from "./pages/ViewLecture.jsx";
 import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
 import SearchWithAi from "./pages/SearchwithAi.jsx";
+import  GetCreatorCourses  from "./customHooks/getCreaterCourse.js";
+import  usePublishedCourses  from "./customHooks/useAllPublishedCourses.js";
 
 export const App = () => {
   useGetCurrentUser();
@@ -47,7 +45,6 @@ export const App = () => {
     <>
       <ToastContainer />
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -59,7 +56,6 @@ export const App = () => {
             userData?.role === "educator" ? <Dashboard /> : <Navigate to="/" />
           }
         />
-       
         <Route
           path="/create"
           element={
@@ -103,7 +99,6 @@ export const App = () => {
           }
         />
 
-        {/* Course Discovery & Learning */}
         <Route path="/allcourses" element={<AllCourses />} />
         <Route
           path="/course/:courseId"
@@ -113,22 +108,16 @@ export const App = () => {
           path="/viewlecture/:courseId"
           element={userData ? <ViewLecture /> : <Navigate to="/login" />}
         />
-
-        {/* Payment Routes */}
         <Route
           path="/payment/:courseId"
           element={userData ? <PaymentPage /> : <Navigate to="/login" />}
         />
         <Route path="/payment-success" element={<Success />} />
         <Route path="/payment-failure" element={<Failure />} />
-
-        {/* AI Search */}
         <Route
           path="/search"
           element={userData ? <SearchWithAi /> : <Navigate to="/login" />}
         />
-
-        {/* Profile & Settings */}
         <Route
           path="/profile"
           element={userData ? <Profile /> : <Navigate to="/login" />}
@@ -137,9 +126,6 @@ export const App = () => {
           path="/edit-profile"
           element={userData ? <EditProfile /> : <Navigate to="/login" />}
         />
-       
-
-        {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>

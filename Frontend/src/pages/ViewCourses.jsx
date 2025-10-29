@@ -212,7 +212,7 @@ function ViewCourses() {
       };
     }
     return {
-      text: `Enroll Now - $${selectedCourse?.price}`,
+      text: `Enroll Now - Rs ${selectedCourse?.price}`,
       icon: <FaLock />,
       disabled: false,
       className: "bg-blue-600 hover:bg-blue-700",

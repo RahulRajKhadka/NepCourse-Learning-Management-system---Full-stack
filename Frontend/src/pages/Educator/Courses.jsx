@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import img from "../../assets/empty.jpg";
 import { FaEdit } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import axios from "axios";
 import { serverUrl } from "../../config.js";
 import { setCreatorCourses } from "../../redux/courseSlice.jsx";
@@ -11,12 +11,16 @@ import { setCreatorCourses } from "../../redux/courseSlice.jsx";
 const Courses = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const hasFetched = useRef(false); // ✅ Prevent multiple fetches
 
   const { userData } = useSelector((state) => state.user);
   const creatorCourses = useSelector((state) => state.course.creatorCourses);
   const safeCourseData = creatorCourses || [];
 
   useEffect(() => {
+    
+    if (hasFetched.current) return;
+
     const CreateCourses = async () => {
       try {
         const result = await axios.get(
@@ -28,26 +32,14 @@ const Courses = () => {
 
         const courses = result.data.courses || [];
         dispatch(setCreatorCourses(courses));
+        hasFetched.current = true; // ✅ Mark as fetched
       } catch (error) {
         dispatch(setCreatorCourses([]));
       }
     };
-    CreateCourses();
-  }, [userData, dispatch]);
 
-  useEffect(() => {
-    if (Array.isArray(safeCourseData) && safeCourseData.length > 0) {
-      console.log("Checkpoint 6 → All creator courses:", safeCourseData);
-      safeCourseData.forEach((course, index) => {
-        console.log(`Checkpoint 6.${index + 1} →`, {
-          id: course._id,
-          title: course.title,
-          idType: typeof course._id,
-          idLength: course._id?.length,
-        });
-      });
-    }
-  }, [safeCourseData]);
+    CreateCourses();
+  }, [dispatch]); // ✅ Remove userData from dependencies
 
   return (
     <>
@@ -149,7 +141,7 @@ const Courses = () => {
                             <FaRegMoneyBill1 className="text-green-600 w-5 h-5" />
                           </div>
                           <span className="font-semibold text-gray-800 text-lg">
-                            {course?.price ? `₹${course.price}` : "Free"}
+                            {course?.price ? `₹Rs{course.price}` : "Free"}
                           </span>
                         </div>
                       </td>

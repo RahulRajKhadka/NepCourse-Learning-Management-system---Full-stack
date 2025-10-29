@@ -1,19 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import useGetCurrentUser from "../customHooks/getCurrentUser"; // Adjust path as needed
+import axios from "axios";
+import { serverUrl } from "../config";
 
 function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { courseId } = useParams();
   const [selectedPayment, setSelectedPayment] = useState("");
+  const [course, setCourse] = useState(location.state?.course || null);
+  const [amount, setAmount] = useState(location.state?.amount || 0);
+  const [loading, setLoading] = useState(false);
 
   // Redux user state
   const { userData } = useSelector((state) => state.user);
-  useGetCurrentUser();
+  const publishedCourses = useSelector(
+    (state) => state.course.publishedCourses
+  );
 
-  const { course, amount } = location.state || {};
+  // Fetch course data if not in location.state
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      // First, try to find course in Redux store
+      if (publishedCourses?.length > 0) {
+        const foundCourse = publishedCourses.find((c) => c._id === courseId);
+        if (foundCourse) {
+          setCourse(foundCourse);
+          setAmount(foundCourse.price || 0);
+          return;
+        }
+      }
+
+      // If not found, fetch from API
+      if (!course || !course.price) {
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `${serverUrl}/api/courses/${courseId}`,
+            { withCredentials: true }
+          );
+
+          if (response.data.success) {
+            setCourse(response.data.course);
+            setAmount(response.data.course.price || 0);
+          }
+        } catch (error) {
+          console.error("Error fetching course:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId, course, publishedCourses]);
+
   const paymentMethods = [
     {
       id: "khalti",
@@ -38,6 +80,7 @@ function PaymentPage() {
       comingSoon: true,
     },
   ];
+
   const handlePaymentSelect = (paymentId) => {
     setSelectedPayment(paymentId);
   };
@@ -62,7 +105,7 @@ function PaymentPage() {
       };
 
       const response = await fetch(
-        "http://localhost:8000/api/payment/initiate-course-payment",
+        `${serverUrl}/api/payment/initiate-course-payment`,
         {
           method: "POST",
           headers: {
@@ -96,7 +139,7 @@ function PaymentPage() {
     }
   };
 
-  if (userData === null || userData === undefined) {
+  if (loading || userData === null || userData === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -113,7 +156,7 @@ function PaymentPage() {
         <div className="text-center">
           <p className="text-gray-600 mb-4">Course information not found</p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/allcourses")}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Go Back to Courses
@@ -160,13 +203,12 @@ function PaymentPage() {
                     onClick={() =>
                       !method.comingSoon && handlePaymentSelect(method.id)
                     }
-                    className={`relative border-2 rounded-xl p-4 transition-all duration-200 flex items-center gap-4 ${
+                    className={`relative border-2 rounded-xl p-4 transition-all duration-200 flex items-center gap-4 cursor-pointer ${
                       selectedPayment === method.id
                         ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200"
                         : method.color
                     }`}
                   >
-                    {/* ✅ Coming Soon Badge */}
                     {method.comingSoon && (
                       <div className="absolute top-2 right-2 bg-yellow-400 text-xs font-semibold px-2 py-1 rounded-md text-gray-800">
                         Coming Soon
