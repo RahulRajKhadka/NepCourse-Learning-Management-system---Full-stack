@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
-import {serverUrl} from "./config.js";
+import { serverUrl } from "./config.js";
 import { ToastContainer } from "react-toastify";
 import useGetCurrentUser from "./customHooks/getCurrentUser.js";
 import { useSelector } from "react-redux";
@@ -33,27 +33,12 @@ export const App = () => {
   useGetCurrentUser();
   GetCreatorCourses();
   usePublishedCourses();
-  const { userData } = useSelector((state) => state.user);
+  const { userData, loading } = useSelector((state) => state.user);
 
-  // Add loading state for authentication check
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  
-  useEffect(() => {
-    // Give time for auth to load on initial mount and refresh
-    const timer = setTimeout(() => {
-      setIsAuthChecking(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [userData]);
-  
-  // Show loading screen while checking authentication
-  if (isAuthChecking) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -62,45 +47,50 @@ export const App = () => {
     <>
       <ToastContainer />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/signup"
-          element={!userData ? <SignUp /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/profile"
-          element={userData ? <Profile /> : <Navigate to="/signup" />}
-        />
-        <Route
-          path="/forgot-password"
-          element={!userData ? <ForgetPassword /> : <Navigate to="/signup" />}
-        />
-        <Route
-          path="/edit-Profile"
-          element={userData ? <EditProfile /> : <Navigate to="/signup" />}
-        />
-        <Route
-          path="/allcourses"
-          element={userData ? <AllCourses /> : <Navigate to="/signup" />}
-        />
-        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgetPassword />} />
 
         <Route
+          path="/dashboard"
+          element={
+            userData?.role === "educator" ? <Dashboard /> : <Navigate to="/" />
+          }
+        />
+       
+        <Route
           path="/create"
-          element={userData ? <CreateCourse /> : <Navigate to="/signup" />}
+          element={
+            userData?.role === "educator" ? (
+              <CreateCourse />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
         />
         <Route
           path="/courses"
-          element={userData ? <Courses /> : <Navigate to="/signup" />}
+          element={
+            userData?.role === "educator" ? <Courses /> : <Navigate to="/" />
+          }
         />
         <Route
           path="/editcourse/:courseId"
-          element={userData ? <EditCourse /> : <Navigate to="/signup" />}
+          element={
+            userData?.role === "educator" ? <EditCourse /> : <Navigate to="/" />
+          }
         />
         <Route
           path="/createlecture/:courseId"
-          element={userData ? <CreateLecture /> : <Navigate to="/signup" />}
+          element={
+            userData?.role === "educator" ? (
+              <CreateLecture />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
@@ -108,27 +98,49 @@ export const App = () => {
             userData?.role === "educator" ? (
               <EditLecture />
             ) : (
-              <Navigate to="/signup" />
+              <Navigate to="/" />
             )
           }
         />
+
+        {/* Course Discovery & Learning */}
+        <Route path="/allcourses" element={<AllCourses />} />
         <Route
           path="/course/:courseId"
-          element={
-            userData?.role === "educator" ? (
-              <ViewCourses />
-            ) : (
-              <Navigate to="/signup" />
-            )
-          }
+          element={userData ? <ViewCourses /> : <Navigate to="/login" />}
         />
-        <Route path="/payment/:courseId" element={<PaymentPage />} />
+        <Route
+          path="/viewlecture/:courseId"
+          element={userData ? <ViewLecture /> : <Navigate to="/login" />}
+        />
+
+        {/* Payment Routes */}
+        <Route
+          path="/payment/:courseId"
+          element={userData ? <PaymentPage /> : <Navigate to="/login" />}
+        />
         <Route path="/payment-success" element={<Success />} />
         <Route path="/payment-failure" element={<Failure />} />
-        <Route path="/my-courses" element={<MyCourses />} />
-        <Route path="/viewlecture/:courseId" element={<ViewLecture />} />
-        <Route path="/my-enrolled-courses" element={<MyEnrolledCourse />} />
-        <Route path="/search" element={<SearchWithAi />} />
+
+        {/* AI Search */}
+        <Route
+          path="/search"
+          element={userData ? <SearchWithAi /> : <Navigate to="/login" />}
+        />
+
+        {/* Profile & Settings */}
+        <Route
+          path="/profile"
+          element={userData ? <Profile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/edit-profile"
+          element={userData ? <EditProfile /> : <Navigate to="/login" />}
+        />
+       
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
   );

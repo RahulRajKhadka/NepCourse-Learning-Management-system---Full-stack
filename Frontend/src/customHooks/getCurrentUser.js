@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { serverUrl } from "../config.js";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../redux/userSlice.jsx";
+import { setUserData, setLoading } from "../redux/userSlice.jsx";
 import axios from "axios";
 
 const useGetCurrentUser = () => {
@@ -9,6 +9,8 @@ const useGetCurrentUser = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      dispatch(setLoading(true)); // Start loading
+      
       try {
         console.log("Fetching current user...");
         console.log("Server URL:", serverUrl);
@@ -40,6 +42,8 @@ const useGetCurrentUser = () => {
           );
           dispatch(setUserData(null));
         }
+      } finally {
+        dispatch(setLoading(false)); // Stop loading regardless of success or error
       }
     };
 
