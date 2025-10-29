@@ -349,12 +349,6 @@ export function SignUp() {
                 </>
               )}
             </button>
-
-            <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-100 rounded">
-              <p>Debug: Role = {formData.role}</p>
-              <p>Loading: {loading ? "Yes" : "No"}</p>
-              <p>Google Loading: {googleLoading ? "Yes" : "No"}</p>
-            </div>
           </div>
 
           <div className="text-gray-600 text-xs sm:text-sm mt-2">

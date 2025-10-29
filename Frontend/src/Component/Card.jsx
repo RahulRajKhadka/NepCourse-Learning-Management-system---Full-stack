@@ -58,22 +58,22 @@ function Card({
 
   return (
     <div
-      className="max-w-sm w-full bg-white rounded-xl shadow border border-gray-200 cursor-pointer"
+      className="max-w-sm w-full bg-white rounded-xl shadow-lg hover:shadow-2xl border-2 border-gray-100 hover:border-blue-200 cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden"
       onClick={() => navigate(`/course/${id}`)}
     >
       {/* Thumbnail */}
-      <div className="relative h-48 w-full overflow-hidden bg-gray-100">
+      <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
           src={imageSrc}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
           onError={() => setImageSrc(img)}
         />
 
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
           <span
-            className={`px-3 py-1 text-xs font-semibold rounded-lg border ${getCategoryColor(
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg border-2 backdrop-blur-sm bg-white/90 shadow-md ${getCategoryColor(
               category
             )}`}
           >
@@ -84,7 +84,7 @@ function Card({
         {/* Level Badge */}
         <div className="absolute top-3 right-3">
           <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border ${levelBadge.color}`}
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-lg border-2 backdrop-blur-sm bg-white/90 shadow-md ${levelBadge.color}`}
           >
             <span>{levelBadge.icon}</span>
             <span>{level || "All Levels"}</span>
@@ -93,7 +93,7 @@ function Card({
 
         {/* Price */}
         <div className="absolute bottom-3 right-3">
-          <div className="bg-white rounded-lg px-3 py-2 shadow">
+          <div className="bg-white rounded-lg px-3 py-2 shadow-md border-2 border-gray-100">
             <p className="text-lg font-bold text-blue-600">
               {price === 0 || !price ? "Free" : `₹${price}`}
             </p>
@@ -158,7 +158,7 @@ function Card({
               {[...Array(Math.min(3, enrolledStudents.length))].map((_, i) => (
                 <div
                   key={i}
-                  className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-semibold"
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-semibold shadow-sm"
                 >
                   {String.fromCharCode(65 + i)}
                 </div>
@@ -172,7 +172,7 @@ function Card({
 
         {/* View Course Button */}
         <button
-          className="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow"
+          className="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
           onClick={() => navigate(`/course/${id}`)}
         >
           View Course Details

@@ -10,8 +10,7 @@ import { Navigate } from "react-router-dom";
 
 function AllCourses() {
   const navigate = useNavigate();
-  const { publishedCourses, loading } = useAllPublishedCourses(); 
-
+  const { publishedCourses, loading } = useAllPublishedCourses();
 
   const [category, setCategory] = useState([]);
   const [filterCourses, setFilterCourses] = useState([]);
@@ -201,11 +200,9 @@ function AllCourses() {
             <p className="text-gray-600 text-sm md:text-base">
               {loading
                 ? "Loading courses..."
-                : filterCourses.length > 0
-                ? `Showing ${filterCourses.length} course${
-                    filterCourses.length !== 1 ? "s" : ""
-                  }${category.length > 0 ? ` in selected categories` : ""}`
-                : "No courses found"}
+                : filterCourses.length === 0
+                ? "No courses found"
+                : ""}
             </p>
           </div>
 
@@ -217,7 +214,7 @@ function AllCourses() {
               </p>
             </div>
           ) : filterCourses?.length > 0 ? (
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {filterCourses.map((course, index) => (
                 <Card
                   key={course._id || index}
