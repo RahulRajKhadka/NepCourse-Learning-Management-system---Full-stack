@@ -16,6 +16,9 @@ import {
   Cell,
 } from "recharts";
 
+// Add this line at the top to use environment variable
+const API_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
+
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.user);
@@ -30,16 +33,15 @@ export const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        "http://localhost:8000/api/dashboard/instructor",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      setError(null);
+      // Use API_URL variable instead of hardcoded URL
+      const response = await fetch(`${API_URL}/api/dashboard/instructor`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch dashboard data");
@@ -77,8 +79,8 @@ export const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+        <div className="max-w-md w-full rounded-xl bg-white p-8 shadow-lg">
           <div className="text-center">
             <div className="mb-4 text-red-600">
               <svg
@@ -95,16 +97,27 @@ export const Dashboard = () => {
                 />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-gray-800">
-              Error Loading Dashboard
+            <p className="text-lg font-semibold text-gray-800 mb-2">
+              Unable to Connect
             </p>
-            <p className="mt-2 text-sm text-gray-600">{error}</p>
-            <button
-              onClick={fetchDashboardData}
-              className="mt-6 rounded-lg bg-blue-600 px-6 py-2 text-white font-medium hover:bg-blue-700 transition"
-            >
-              Try Again
-            </button>
+            <p className="text-sm text-gray-600 mb-1">{error}</p>
+            <p className="text-xs text-gray-500 mb-6">
+              Make sure your backend server is running at {API_URL}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={fetchDashboardData}
+                className="rounded-lg bg-blue-600 px-6 py-2 text-white font-medium hover:bg-blue-700 transition"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => navigateTo("/courses")}
+                className="rounded-lg bg-gray-200 px-6 py-2 text-gray-700 font-medium hover:bg-gray-300 transition"
+              >
+                Create Course
+              </button>
+            </div>
           </div>
         </div>
       </div>
