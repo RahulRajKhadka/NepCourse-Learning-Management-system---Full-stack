@@ -131,7 +131,7 @@ function EditLecture() {
       dispatch(setAllLectures(lecturesResponse.data.lectures || []));
 
       toast.success("Lecture updated successfully");
-      navigate("/courses");
+      navigate("/createlecture/" + courseId);
     } catch (error) {
       toast.error(
         "Error updating lecture: " +

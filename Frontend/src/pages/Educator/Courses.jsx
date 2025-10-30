@@ -11,14 +11,13 @@ import { setCreatorCourses } from "../../redux/courseSlice.jsx";
 const Courses = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const hasFetched = useRef(false); // ✅ Prevent multiple fetches
+  const hasFetched = useRef(false); //
 
   const { userData } = useSelector((state) => state.user);
   const creatorCourses = useSelector((state) => state.course.creatorCourses);
   const safeCourseData = creatorCourses || [];
 
   useEffect(() => {
-    
     if (hasFetched.current) return;
 
     const CreateCourses = async () => {
@@ -32,7 +31,7 @@ const Courses = () => {
 
         const courses = result.data.courses || [];
         dispatch(setCreatorCourses(courses));
-        hasFetched.current = true; // ✅ Mark as fetched
+        hasFetched.current = true;
       } catch (error) {
         dispatch(setCreatorCourses([]));
       }
@@ -48,11 +47,12 @@ const Courses = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center gap-4">
               <button
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 hover:bg-gray-50 group"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 hover:bg-gray-50 group cursor-pointer"
                 onClick={() => navigate("/Dashboard")}
               >
                 <FaArrowLeftLong className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors" />
               </button>
+
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
                   My Courses
@@ -141,7 +141,7 @@ const Courses = () => {
                             <FaRegMoneyBill1 className="text-green-600 w-5 h-5" />
                           </div>
                           <span className="font-semibold text-gray-800 text-lg">
-                            {course?.price ? `₹Rs{course.price}` : "Free"}
+                            {course?.price ? `Rs ${course.price}` : "Free"}
                           </span>
                         </div>
                       </td>

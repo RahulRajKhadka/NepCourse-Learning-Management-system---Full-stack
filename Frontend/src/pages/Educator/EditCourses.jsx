@@ -299,13 +299,12 @@ function EditCourse() {
           Edit Course Information
         </h2>
       </div>
-
-      <div className="space-x-2 space-y-2">
+      <div className="flex justify-end mb-4">
         <button
-          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
           onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
+          className="bg-gradient-to-r from-gray-900 via-black to-gray-800 text-white px-7 py-3 rounded-xl font-medium shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out"
         >
-          Go to Lecture pages
+          Go to Lecture Pages →
         </button>
       </div>
 

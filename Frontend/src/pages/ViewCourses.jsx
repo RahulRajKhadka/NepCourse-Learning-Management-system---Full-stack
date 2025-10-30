@@ -227,19 +227,20 @@ function ViewCourses() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 mb-4 group"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 
+             hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
           >
-            <FaArrowLeftLong className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
-            <span className="font-medium">Back to Courses</span>
+            <FaArrowLeftLong className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
+            <span>Back to Courses</span>
           </button>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8 mt-4">
             <div className="lg:col-span-1">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
                 <img
                   src={selectedCourse?.thumbnail || img}
                   alt={selectedCourse?.title || "Course Thumbnail"}
-                  className="w-full h-64 sm:h-80 lg:h-96 object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-30 sm:h-50 lg:h-96  transition-transform duration-300 group-hover:scale-105"
                 />
                 {isEnrolled && (
                   <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
