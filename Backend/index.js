@@ -32,7 +32,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
-  "https://your-frontend-app-name.onrender.com",
+ "https://nepcourse-learning-management-system-7135.onrender.com",
 ];
 
 app.use(express.json());
