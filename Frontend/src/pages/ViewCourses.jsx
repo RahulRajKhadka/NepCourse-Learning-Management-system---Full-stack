@@ -23,6 +23,10 @@ function ViewCourses() {
   const navigate = useNavigate();
   const { selectedCourse } = useSelector((state) => state.course);
   const creatorCourses = useSelector((state) => state.course.creatorCourses);
+  const publishedCourses = useSelector(
+    (state) => state.course.publishedCourses
+  );
+  const userData = useSelector((state) => state.user.userData);
   const { courseId } = useParams();
   const dispatch = useDispatch();
   const [selectedLecture, setSelectedLecture] = useState(null);
@@ -67,24 +71,63 @@ function ViewCourses() {
     }
   }, [courseId, checkEnrollmentStatus]);
 
-  const fetchCourseData = useCallback(() => {
-    const foundCourse = creatorCourses.find(
+  // FIXED: Fetch course data based on user role
+  const fetchCourseData = useCallback(async () => {
+    // Check if user is educator and look in creatorCourses first
+    if (userData?.role === "educator") {
+      const foundCourse = creatorCourses.find(
+        (course) => course._id === courseId
+      );
+      if (foundCourse) {
+        dispatch(setSelectedCourse(foundCourse));
+        return;
+      }
+    }
+
+    // For students or if not found in creatorCourses, check publishedCourses
+    const foundPublishedCourse = publishedCourses.find(
       (course) => course._id === courseId
     );
-    if (foundCourse) {
-      dispatch(setSelectedCourse(foundCourse));
-    }
-  }, [creatorCourses, courseId, dispatch]);
 
+    if (foundPublishedCourse) {
+      dispatch(setSelectedCourse(foundPublishedCourse));
+      return;
+    }
+
+    // If still not found, fetch directly from API
+    try {
+      const response = await axios.get(`${serverUrl}/api/courses/${courseId}`, {
+        withCredentials: true,
+      });
+      if (response.data.success) {
+        dispatch(setSelectedCourse(response.data.course));
+      }
+    } catch (error) {
+      console.error("Error fetching course:", error);
+    }
+  }, [creatorCourses, publishedCourses, courseId, dispatch, userData]);
+
+  // FIXED: Get other courses by the same creator
   useEffect(() => {
-    if (creatorData?._id && creatorCourses.length > 0) {
-      const otherCourses = creatorCourses.filter(
-        (course) =>
-          course.creator === creatorData._id && course._id !== courseId
-      );
+    if (creatorData?._id) {
+      // Check both creatorCourses and publishedCourses
+      let otherCourses = [];
+
+      if (userData?.role === "educator") {
+        otherCourses = creatorCourses.filter(
+          (course) =>
+            course.creator === creatorData._id && course._id !== courseId
+        );
+      } else {
+        otherCourses = publishedCourses.filter(
+          (course) =>
+            course.creator === creatorData._id && course._id !== courseId
+        );
+      }
+
       setCreatorCourse(otherCourses);
     }
-  }, [creatorData, creatorCourses, courseId]);
+  }, [creatorData, creatorCourses, publishedCourses, courseId, userData]);
 
   useEffect(() => {
     const handleCreator = async () => {
@@ -307,7 +350,7 @@ function ViewCourses() {
                     <FaTag className="w-4 h-4 text-orange-500" />
                     <span className="text-sm font-medium">
                       {selectedCourse?.price
-                        ? `$${selectedCourse.price}`
+                        ? `Rs ${selectedCourse.price}`
                         : "Free"}
                     </span>
                   </div>
