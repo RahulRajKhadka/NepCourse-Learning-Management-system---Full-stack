@@ -11,7 +11,18 @@ import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
 import reviewRouter from "./Routes/reviewRoute.js";
 import dashboardRouter from "./Routes/dashboardRoutes.js";
 
-dotenv.config();
+
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+} else {
+  console.log("Production mode: Using Render environment variables");
+}
+
+// Debug: Log if MONGODB_URL is loaded
+console.log("Environment check:");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MONGODB_URL exists:", !!process.env.MONGODB_URL);
+console.log("PORT:", process.env.PORT);
 
 const port = process.env.PORT || 1000;
 const app = express();
