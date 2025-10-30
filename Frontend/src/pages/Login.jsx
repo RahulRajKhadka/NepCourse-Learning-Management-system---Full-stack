@@ -211,6 +211,7 @@ export const Login = () => {
       setGoogleLoading(false);
     }
   };
+  const [demoLoading, setDemoLoading] = useState(false);
 
   const handleDemoLogin = async (demoType) => {
     const demoCredentials = {
@@ -224,13 +225,61 @@ export const Login = () => {
       },
     };
 
+    // Set loading state for demo
+    setDemoLoading(true);
+
+    // Fill the form
     setEmail(demoCredentials[demoType].email);
     setPassword(demoCredentials[demoType].password);
 
+    // Show toast notification
+    toast.info(
+      `Logging in as Demo ${demoType === "student" ? "Student" : "Educator"}...`
+    );
+
+    // Wait a bit for state to update, then login
     setTimeout(() => {
       handleLogin();
+      setDemoLoading(false);
     }, 500);
   };
+
+  // Update your demo buttons section to this:
+  {
+    /* Demo Login Buttons */
+  }
+  <div className="w-full max-w-md flex gap-4 mt-2">
+    <button
+      type="button"
+      onClick={() => handleDemoLogin("student")}
+      className="flex-1 px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 text-green-700 rounded-md hover:from-green-200 hover:to-green-100 transition-all disabled:opacity-50 text-sm font-medium border border-green-200 shadow-sm"
+      disabled={loading || googleLoading || demoLoading}
+    >
+      {demoLoading ? (
+        <div className="flex items-center justify-center">
+          <ClipLoader color="#15803d" size={16} className="mr-2" />
+          Loading...
+        </div>
+      ) : (
+        "🎓 Demo Student"
+      )}
+    </button>
+    <button
+      type="button"
+      onClick={() => handleDemoLogin("educator")}
+      className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 rounded-md hover:from-blue-200 hover:to-blue-100 transition-all disabled:opacity-50 text-sm font-medium border border-blue-200 shadow-sm"
+      disabled={loading || googleLoading || demoLoading}
+    >
+      {demoLoading ? (
+        <div className="flex items-center justify-center">
+          <ClipLoader color="#1d4ed8" size={16} className="mr-2" />
+          Loading...
+        </div>
+      ) : (
+        "👨‍🏫 Demo Educator"
+      )}
+    </button>
+  </div>;
 
   const handleFormSubmit = (e) => {
     e.preventDefault();

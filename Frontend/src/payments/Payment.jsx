@@ -173,9 +173,12 @@ function PaymentPage() {
         <div className="mb-8">
           <button
             onClick={() => navigate(`/course/${courseId}`)}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 mb-6 group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full 
+             bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium
+             shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-blue-700
+             transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
           >
-            ← <span className="font-medium">Back to Course</span>
+            ← Back to Course
           </button>
 
           <div className="text-center">

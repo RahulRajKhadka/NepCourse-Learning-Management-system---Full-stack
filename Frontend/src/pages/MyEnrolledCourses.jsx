@@ -92,7 +92,6 @@ export default function MyCourses() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-       
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             My Enrolled Courses
@@ -157,7 +156,7 @@ export default function MyCourses() {
               Start your learning journey by enrolling in a course
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/allcourses")}
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
             >
               Browse Courses
@@ -171,7 +170,6 @@ export default function MyCourses() {
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
                 onClick={() => navigate(`/course/${enrollment.course._id}`)}
               >
-               
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={enrollment.course.thumbnail}
@@ -180,7 +178,6 @@ export default function MyCourses() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
-                
                   <div className="absolute top-4 right-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
@@ -192,7 +189,6 @@ export default function MyCourses() {
                     </span>
                   </div>
 
-                
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
                       <FaPlay className="w-6 h-6 text-blue-600 ml-1" />
@@ -253,7 +249,6 @@ export default function MyCourses() {
                     </div>
                   </div>
 
-                
                   <button
                     className="w-full mt-4 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
                     onClick={(e) => {

@@ -294,10 +294,16 @@ function EditCourse() {
           className="top-[-20%] md:top-[20%] absolute left-[0] md:left-[2%] w-[22px] h-[22px] cursor-pointer text-gray-500 hover:text-gray-700"
           onClick={() => navigate("/courses")}
         />
-
-        <h2 className="text-lg font-medium md:pl-[60px]">
-          Edit Course Information
-        </h2>
+        <button
+          onClick={() => navigate("/courses")}
+          className="absolute left-0 md:left-2 top-[-20%] md:top-[20%] inline-flex items-center gap-2 
+             bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white 
+             px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg 
+             hover:scale-105 transition-all duration-300 ease-in-out"
+        >
+          <FaArrowLeftLong className="w-4 h-4" />
+          <span className="hidden md:inline">Back to Courses</span>
+        </button>
       </div>
       <div className="flex justify-end mb-4">
         <button
@@ -555,6 +561,7 @@ function EditCourse() {
                 "Save Changes"
               )}
             </button>
+
             <button
               type="button"
               className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"

@@ -22,6 +22,8 @@ const API_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.user);
+  console.log("Dashboard User Data:", userData);
+
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState(null);
@@ -34,7 +36,7 @@ export const Dashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      // Use API_URL variable instead of hardcoded URL
+
       const response = await fetch(`${API_URL}/api/dashboard/instructor`, {
         method: "GET",
         credentials: "include",
@@ -138,24 +140,24 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Back Button */}
       <button
         onClick={goBack}
-        className="absolute left-[5%] top-[5%] z-10 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+        className="absolute left-10 top-6 z-10 flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-md border border-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white hover:shadow-lg transition-all duration-300 cursor-pointer"
       >
         <svg
-          className="h-6 w-6"
+          className="h-5 w-5"
           fill="none"
           stroke="currentColor"
+          strokeWidth={2.5}
           viewBox="0 0 24 24"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M10 19l-7-7m0 0l7-7m-7 7h18"
           />
         </svg>
+        
       </button>
 
       <div className="w-full px-6 py-10 bg-gray-50 space-y-8">
@@ -164,7 +166,10 @@ export const Dashboard = () => {
           <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
             <div className="flex items-center gap-4">
               <img
-                src={userData?.photoUrl || "https://via.placeholder.com/150"}
+                src={
+                  userData?.photoUrl ||
+                  "https://plus.unsplash.com/premium_photo-1738592736106-a17b897c0ab1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1267"
+                }
                 alt="educator"
                 className="w-24 h-24 rounded-full object-cover ring-4 ring-blue-500"
               />

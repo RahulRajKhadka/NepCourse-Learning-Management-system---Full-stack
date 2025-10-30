@@ -44,9 +44,9 @@ export const Home = () => {
             </h2>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full max-w-2xl px-4 animate-fade-in-up animation-delay-400">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full max-w-2xl  animate-fade-in-up animation-delay-400">
               <button
-                className="group w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 border-2 border-white/90 rounded-2xl text-white text-sm sm:text-base lg:text-lg font-semibold flex gap-3 items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-105 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_32px_rgba(255,255,255,0.3)] backdrop-blur-sm bg-white/5 min-w-[200px]"
+                className="group  sm:w-auto  sm:px-10 py-3.5 sm:py-4 border-2 border-white/90 rounded-2xl text-white text-sm sm:text-base lg:text-lg font-semibold flex gap-3 items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-105 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_32px_rgba(255,255,255,0.3)] backdrop-blur-sm bg-white/5 min-w-[200px]"
                 onClick={() => navigate("/allcourses")}
               >
                 View all Courses
@@ -54,7 +54,7 @@ export const Home = () => {
               </button>
 
               <button
-                className="group w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 border-2 border-blue-400/90 bg-blue-500/10 text-white rounded-2xl text-sm sm:text-base lg:text-lg font-semibold flex gap-3 items-center justify-center hover:bg-blue-500 hover:border-blue-500 hover:scale-105 transition-all duration-300 shadow-[0_8px_24px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_32px_rgba(59,130,246,0.5)] backdrop-blur-sm min-w-[200px]"
+                className="group  sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 border-2 border-blue-400/90 bg-blue-500/10 text-white rounded-2xl text-sm sm:text-base lg:text-lg font-semibold flex gap-3 items-center justify-center hover:bg-blue-500 hover:border-blue-500 hover:scale-105 transition-all duration-300 shadow-[0_8px_24px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_32px_rgba(59,130,246,0.5)] backdrop-blur-sm min-w-[200px]"
                 onClick={() => navigate("/search")}
               >
                 Search with AI

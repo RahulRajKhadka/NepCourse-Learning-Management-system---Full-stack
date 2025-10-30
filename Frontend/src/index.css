@@ -1,10 +1,22 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
-
 @import "tailwindcss";
 
-*{
+/* Global font */
+* {
+  font-family: "Outfit", sans-serif;
+}
 
-  font-family: "Outfit";
+
+body, div, p, span, h1, h2, h3, h4, h5, h6, li {
+  user-select: none;
+}
+
+
+a, button {
+  cursor: pointer;
+}
+
+input, textarea {
+  user-select: text;
+  cursor: text;
 }

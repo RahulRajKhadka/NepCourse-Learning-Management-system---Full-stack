@@ -225,11 +225,7 @@ function Nav() {
                 My Profile
               </button>
 
-              <button
-                className="px-4 py-2 border-2 border-white text-white rounded-[10px] text-[16px] font-light hover:bg-white hover:text-black transition-all duration-200"
-                onClick={() => handleNavigation("/allcourses")}
-              ></button>
-
+            
               {(userData?.role === "educator" ||
                 userData?.role === "teacher") && (
                 <button

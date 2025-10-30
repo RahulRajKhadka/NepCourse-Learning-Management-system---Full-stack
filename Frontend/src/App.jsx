@@ -24,8 +24,8 @@ import MyCourses from "./pages/MyEnrolledCourses.jsx";
 import ViewLecture from "./pages/ViewLecture.jsx";
 import MyEnrolledCourse from "./pages/MyEnrolledCourse.jsx";
 import SearchWithAi from "./pages/SearchwithAi.jsx";
-import  GetCreatorCourses  from "./customHooks/getCreaterCourse.js";
-import  usePublishedCourses  from "./customHooks/useAllPublishedCourses.js";
+import GetCreatorCourses from "./customHooks/getCreaterCourse.js";
+import usePublishedCourses from "./customHooks/useAllPublishedCourses.js";
 
 export const App = () => {
   useGetCurrentUser();
@@ -125,6 +125,10 @@ export const App = () => {
         <Route
           path="/edit-profile"
           element={userData ? <EditProfile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/my-enrolled-courses"
+          element={userData ? <MyCourses /> : <Navigate to="/login" />}
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

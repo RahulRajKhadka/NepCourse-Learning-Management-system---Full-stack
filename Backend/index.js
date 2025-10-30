@@ -10,7 +10,7 @@ import paymentRouter from "./Routes/paymentRoutes.js";
 import enrollmentRoutes from "./Routes/enrollmentRoutes.js";
 import reviewRouter from "./Routes/reviewRoute.js";
 import dashboardRouter from "./Routes/dashboardRoutes.js";
-
+import { seedDemoAccounts } from "./config/seedDemoAccounts.js";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
@@ -18,7 +18,6 @@ if (process.env.NODE_ENV !== "production") {
   console.log("Production mode: Using Render environment variables");
 }
 
-// Debug: Log if MONGODB_URL is loaded
 console.log("Environment check:");
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("MONGODB_URL exists:", !!process.env.MONGODB_URL);
@@ -32,7 +31,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
- "https://nepcourse-learning-management-system-7135.onrender.com",
+  "https://nepcourse-learning-management-system-7135.onrender.com",
 ];
 
 app.use(express.json());
@@ -48,7 +47,7 @@ app.use(
       }
     },
     credentials: true,
-  }),
+  })
 );
 
 app.use("/api/auth", authRouter);
@@ -80,7 +79,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
-  connectDb();
+  await connectDb();
+  try {
+    await seedDemoAccounts();
+  } catch (error) {
+    console.error("Failed to seed demo accounts:", error);
+  }
 });
