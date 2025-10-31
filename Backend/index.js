@@ -14,28 +14,29 @@ import { seedDemoAccounts } from "./config/seedDemoAccounts.js";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
-} else {
-  console.log("Production mode: Using Render environment variables");
 }
 
-console.log("Environment check:");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("MONGODB_URL exists:", !!process.env.MONGODB_URL);
-console.log("PORT:", process.env.PORT);
-
-const port = process.env.PORT || 1000;
+const port = process.env.PORT || 8000;
 const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  process.env.FRONTEND_URL,
-  process.env.CLIENT_URL,
   "https://nepcourse-learning-management-system-7135.onrender.com",
 ];
 
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
+console.log("Allowed origins:", allowedOrigins);
+
 app.use(express.json());
 app.use(cookieParser());
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -43,12 +44,17 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        console.log("Blocked origin:", origin);
+        callback(new Error(`Not allowed by CORS: ${origin}`));
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
+
+app.options("*", cors());
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
@@ -63,14 +69,19 @@ app.get("/", (req, res) => {
     message: "NepCourse Backend API is running",
     status: "success",
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
   });
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "healthy" });
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
   console.error(err.stack);
   res.status(500).json({
     success: false,
@@ -79,12 +90,23 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.path,
+  });
+});
+
 app.listen(port, async () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
   await connectDb();
+
   try {
     await seedDemoAccounts();
+    console.log("Demo accounts seeded successfully");
   } catch (error) {
-    console.error("Failed to seed demo accounts:", error);
+    console.error("Failed to seed demo accounts:", error.message);
   }
 });

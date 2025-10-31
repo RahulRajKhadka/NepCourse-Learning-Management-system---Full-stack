@@ -18,32 +18,31 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const dispatch = useDispatch();
 
-  // Add this to debug Redux state
   const userData = useSelector((state) => state.user.userData);
 
   useEffect(() => {
-    console.log("Login component - Current userData:", userData);
-    // If already logged in, redirect to home
     if (userData && Object.keys(userData).length > 0) {
       navigate("/");
     }
   }, [userData, navigate]);
-  const handleLogin = async (e) => {
+
+  const handleLogin = async (e, demoEmail = null, demoPassword = null) => {
     if (e) e.preventDefault();
 
-    console.log("=== LOGIN ATTEMPT STARTED ===");
-    console.log("Email:", email);
-    console.log("Password length:", password.length);
+    // Use demo credentials if provided, otherwise use form state
+    const loginEmail = demoEmail || email;
+    const loginPassword = demoPassword || password;
 
     // Validation
-    if (!email.trim() || !password.trim()) {
+    if (!loginEmail.trim() || !loginPassword.trim()) {
       toast.error("Please enter both email and password");
       return;
     }
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    if (!/\S+@\S+\.\S+/.test(loginEmail)) {
       toast.error("Please enter a valid email address");
       return;
     }
@@ -51,15 +50,9 @@ export const Login = () => {
     setLoading(true);
     try {
       const loginData = {
-        email: email.trim().toLowerCase(),
-        password: password.trim(),
+        email: loginEmail.trim().toLowerCase(),
+        password: loginPassword.trim(),
       };
-
-      console.log("Sending login request to:", `${serverUrl}/api/auth/login`);
-      console.log("With data:", {
-        email: loginData.email,
-        passwordLength: loginData.password.length,
-      });
 
       const result = await axios.post(
         `${serverUrl}/api/auth/login`,
@@ -72,34 +65,19 @@ export const Login = () => {
         }
       );
 
-      console.log("=== LOGIN SUCCESS ===");
-      console.log("Full response:", result);
-      console.log("Response data:", result.data);
-      console.log("User data:", result.data.user);
-
       if (result.data.user) {
-        console.log("Dispatching user data to Redux:", result.data.user);
         dispatch(setUserData(result.data.user));
-
         toast.success(result.data.message || "Login successful!");
-        console.log("Navigating to home...");
         navigate("/");
       } else {
-        console.error("No user data in response!");
         throw new Error("Invalid response from server");
       }
     } catch (error) {
-      console.error("=== LOGIN FAILED ===");
-      console.error("Error object:", error);
-      console.error("Error response:", error.response);
-      console.error("Error response data:", error.response?.data);
-      console.error("Error status:", error.response?.status);
+      console.error("Login error:", error);
 
       if (error.response) {
         const status = error.response.status;
         const message = error.response.data?.message || error.response.data;
-
-        console.error(`Error ${status}:`, message);
 
         switch (status) {
           case 400:
@@ -110,57 +88,35 @@ export const Login = () => {
             break;
           case 500:
             toast.error("Server error. Please try again later.");
-            console.error("Server error details:", error.response.data);
             break;
           default:
             toast.error(message || "Login failed. Please try again.");
         }
       } else if (error.request) {
-        console.error("No response received:", error.request);
         toast.error("Network error. Please check your connection.");
       } else {
-        console.error("Request setup error:", error.message);
         toast.error("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
-      console.log("=== LOGIN ATTEMPT ENDED ===");
+      setDemoLoading(false);
     }
   };
 
-  // ✅ ADD THIS NEW GOOGLE SIGN-IN FUNCTION
   const googleSignIn = async () => {
-    console.log("🔵 Google Sign-In button CLICKED!");
-
-    if (googleLoading) {
-      console.log("⚠️ Already loading, exiting...");
-      return;
-    }
+    if (googleLoading) return;
 
     try {
       setGoogleLoading(true);
-      console.log("✅ Set googleLoading to true");
-      console.log("🔵 Starting Google Sign-In...");
-
-      console.log("🔵 Opening Firebase popup...");
       const response = await signInWithPopup(auth, provider);
-      console.log("✅ Firebase popup completed!");
-
       const user = response.user;
-      console.log("✅ Firebase user received:", {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        uid: user.uid,
-      });
 
       const requestData = {
         name: user.displayName,
         email: user.email,
         photoUrl: user.photoURL,
-        role: "student", // Default role for login
+        role: "student",
       };
-      console.log("🔵 Sending to backend:", requestData);
 
       const result = await axios.post(
         serverUrl + "/api/auth/googleauth",
@@ -171,48 +127,31 @@ export const Login = () => {
         }
       );
 
-      console.log("✅ Backend response received:", result.data);
-
       if (result.data.success && result.data.user) {
-        console.log("✅ Authentication successful!");
-
         dispatch(setUserData(result.data.user));
         toast.success(result.data.message || "Google Sign-In Successful");
-
-        console.log("✅ Navigating to home...");
         navigate("/");
       } else {
-        console.error("❌ Backend returned success:false");
         throw new Error(result.data.message || "Authentication failed");
       }
     } catch (error) {
-      console.error("❌ Google Sign-In Error:", error);
+      console.error("Google Sign-In Error:", error);
 
       if (error.response) {
-        console.error("❌ Backend error response:", error.response.data);
         toast.error(error.response.data.message || "Google Sign-In failed");
-      } else if (error.code === "auth/cancelled-popup-request") {
-        console.log("⚠️ Popup request cancelled");
       } else if (error.code === "auth/popup-closed-by-user") {
-        console.log("⚠️ User closed the popup");
         toast.info("Sign-in was cancelled");
       } else if (error.code === "auth/popup-blocked") {
-        console.error("❌ Popup was blocked");
         toast.error("Popup was blocked. Please allow popups for this site.");
-      } else if (error.code === "auth/unauthorized-domain") {
-        console.error("❌ Domain not authorized");
-        toast.error("This domain is not authorized. Please contact support.");
       } else {
-        console.error("❌ Unknown error");
         toast.error(error.message || "Google Sign-In failed");
       }
     } finally {
-      console.log("🔵 Setting googleLoading to false");
       setGoogleLoading(false);
     }
   };
-  const [demoLoading, setDemoLoading] = useState(false);
 
+  // ✅ FIXED DEMO LOGIN FUNCTION
   const handleDemoLogin = async (demoType) => {
     const demoCredentials = {
       student: {
@@ -225,65 +164,20 @@ export const Login = () => {
       },
     };
 
-    // Set loading state for demo
+    const credentials = demoCredentials[demoType];
+    
     setDemoLoading(true);
-
-    // Fill the form
-    setEmail(demoCredentials[demoType].email);
-    setPassword(demoCredentials[demoType].password);
-
-    // Show toast notification
     toast.info(
       `Logging in as Demo ${demoType === "student" ? "Student" : "Educator"}...`
     );
 
-    // Wait a bit for state to update, then login
-    setTimeout(() => {
-      handleLogin();
-      setDemoLoading(false);
-    }, 500);
+    // Directly call handleLogin with demo credentials
+    await handleLogin(null, credentials.email, credentials.password);
   };
-
-  // Update your demo buttons section to this:
-  {
-    /* Demo Login Buttons */
-  }
-  <div className="w-full max-w-md flex gap-4 mt-2">
-    <button
-      type="button"
-      onClick={() => handleDemoLogin("student")}
-      className="flex-1 px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 text-green-700 rounded-md hover:from-green-200 hover:to-green-100 transition-all disabled:opacity-50 text-sm font-medium border border-green-200 shadow-sm"
-      disabled={loading || googleLoading || demoLoading}
-    >
-      {demoLoading ? (
-        <div className="flex items-center justify-center">
-          <ClipLoader color="#15803d" size={16} className="mr-2" />
-          Loading...
-        </div>
-      ) : (
-        "🎓 Demo Student"
-      )}
-    </button>
-    <button
-      type="button"
-      onClick={() => handleDemoLogin("educator")}
-      className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 rounded-md hover:from-blue-200 hover:to-blue-100 transition-all disabled:opacity-50 text-sm font-medium border border-blue-200 shadow-sm"
-      disabled={loading || googleLoading || demoLoading}
-    >
-      {demoLoading ? (
-        <div className="flex items-center justify-center">
-          <ClipLoader color="#1d4ed8" size={16} className="mr-2" />
-          Loading...
-        </div>
-      ) : (
-        "👨‍🏫 Demo Educator"
-      )}
-    </button>
-  </div>;
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    handleLogin();
+    handleLogin(e);
   };
 
   return (
@@ -317,7 +211,7 @@ export const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading || googleLoading}
+              disabled={loading || googleLoading || demoLoading}
             />
           </div>
 
@@ -339,43 +233,68 @@ export const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loading || googleLoading}
+              disabled={loading || googleLoading || demoLoading}
             />
             <button
               type="button"
               className="absolute right-3 bottom-2 text-gray-500 hover:text-gray-700 cursor-pointer"
               onClick={() => setShow(!show)}
-              disabled={loading || googleLoading}
+              disabled={loading || googleLoading || demoLoading}
             >
               {show ? <IoEyeOffSharp size={20} /> : <IoEyeOutline size={20} />}
             </button>
           </div>
 
-          {/* Demo Login Buttons */}
-          <div className="w-full max-w-md flex gap-4 mt-2">
-            <button
-              type="button"
-              onClick={() => handleDemoLogin("student")}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
-              disabled={loading || googleLoading}
-            >
-              Demo Student
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin("educator")}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
-              disabled={loading || googleLoading}
-            >
-              Demo Educator
-            </button>
+          {/* ✅ IMPROVED DEMO LOGIN BUTTONS */}
+          <div className="w-full max-w-md">
+            <p className="text-xs text-gray-500 text-center mb-2">
+              Try demo accounts:
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("student")}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                disabled={loading || googleLoading || demoLoading}
+              >
+                {demoLoading ? (
+                  <div className="flex items-center justify-center">
+                    <ClipLoader color="#ffffff" size={16} className="mr-2" />
+                    Loading...
+                  </div>
+                ) : (
+                  <>
+                    <span className="mr-1">🎓</span>
+                    Demo Student
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("educator")}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                disabled={loading || googleLoading || demoLoading}
+              >
+                {demoLoading ? (
+                  <div className="flex items-center justify-center">
+                    <ClipLoader color="#ffffff" size={16} className="mr-2" />
+                    Loading...
+                  </div>
+                ) : (
+                  <>
+                    <span className="mr-1">👨‍🏫</span>
+                    Demo Educator
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Login Button */}
           <button
             type="submit"
             className="w-full max-w-md bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
-            disabled={loading || googleLoading}
+            disabled={loading || googleLoading || demoLoading}
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -400,15 +319,12 @@ export const Login = () => {
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-          {/* ✅ FIXED GOOGLE SIGN-IN BUTTON WITH onClick HANDLER */}
+          {/* Google Sign-In Button */}
           <button
             type="button"
             className="flex items-center justify-center w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all disabled:opacity-50 cursor-pointer"
-            disabled={loading || googleLoading}
+            disabled={loading || googleLoading || demoLoading}
             onClick={googleSignIn}
-            style={{
-              cursor: loading || googleLoading ? "not-allowed" : "pointer",
-            }}
           >
             {googleLoading ? (
               <>
